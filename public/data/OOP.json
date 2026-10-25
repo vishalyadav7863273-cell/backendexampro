@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "generated_by": "ExamPro AI Question Generator",
+  "description": "BCA Object Oriented Programming practice questions",
+  "exams": [
+    {
+      "title": "OOP — Practice Set",
+      "subject": "Object Oriented Programming",
+      "description": "Classes, objects, inheritance, polymorphism, abstraction aur encapsulation",
+      "duration": 30,
+      "passingScore": 60,
+      "questions": [
+        {
+          "text": "What is an object?",
+          "options": ["Instance of a class", "A database", "A compiler", "A loop"],
+          "correct": 0
+        },
+        {
+          "text": "Which concept allows one class to acquire properties of another?",
+          "options": ["Encapsulation", "Inheritance", "Abstraction", "Polymorphism"],
+          "correct": 1
+        },
+        {
+          "text": "Which concept represents one interface with multiple implementations?",
+          "options": ["Inheritance", "Encapsulation", "Polymorphism", "Compilation"],
+          "correct": 2
+        },
+        {
+          "text": "Which concept hides implementation details?",
+          "options": ["Abstraction", "Inheritance", "Looping", "Overloading"],
+          "correct": 0
+        },
+        {
+          "text": "What is a class?",
+          "options": ["Blueprint for objects", "A database", "A compiler", "A network"],
+          "correct": 0
+        },
+        {
+          "text": "What is encapsulation?",
+          "options": ["Wrapping data and methods together", "Creating multiple classes", "Deleting objects", "Running a program"],
+          "correct": 0
+        },
+        {
+          "text": "What is method overloading?",
+          "options": ["Same method name with different parameters", "Deleting a method", "Creating a class", "Using only one method"],
+          "correct": 0
+        },
+        {
+          "text": "Which OOP feature allows code reuse?",
+          "options": ["Inheritance", "Abstraction", "Compilation", "Casting"],
+          "correct": 0
+        },
+        {
+          "text": "Which access modifier provides the highest restriction in Java?",
+          "options": ["public", "protected", "private", "default"],
+          "correct": 2
+        },
+        {
+          "text": "Which keyword is used to create an object in Java?",
+          "options": ["class", "object", "new", "create"],
+          "correct": 2
+        }
+      ]
+    }
+  ]
+}

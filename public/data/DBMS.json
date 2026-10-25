@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "generated_by": "ExamPro AI Question Generator",
+  "description": "BCA DBMS practice questions",
+  "exams": [
+    {
+      "title": "DBMS — Practice Set",
+      "subject": "Database Management System",
+      "description": "SQL, keys, normalization, transactions aur database concepts",
+      "duration": 30,
+      "passingScore": 60,
+      "questions": [
+        {
+          "text": "What does DBMS stand for?",
+          "options": ["Database Management System", "Data Backup Management System", "Database Monitoring System", "Data Management Software"],
+          "correct": 0
+        },
+        {
+          "text": "Which SQL command is used to retrieve data?",
+          "options": ["INSERT", "UPDATE", "SELECT", "DELETE"],
+          "correct": 2
+        },
+        {
+          "text": "Which key uniquely identifies each record in a table?",
+          "options": ["Foreign Key", "Primary Key", "Candidate Key", "Alternate Key"],
+          "correct": 1
+        },
+        {
+          "text": "Which normal form removes partial dependency?",
+          "options": ["1NF", "2NF", "3NF", "BCNF"],
+          "correct": 1
+        },
+        {
+          "text": "Which SQL command is used to add a new record?",
+          "options": ["ADD", "INSERT", "CREATE", "UPDATE"],
+          "correct": 1
+        },
+        {
+          "text": "What does SQL stand for?",
+          "options": ["Structured Query Language", "Simple Query Language", "System Query Language", "Structured Question Language"],
+          "correct": 0
+        },
+        {
+          "text": "Which command is used to remove a table?",
+          "options": ["DELETE", "REMOVE", "DROP", "CLEAR"],
+          "correct": 2
+        },
+        {
+          "text": "Which JOIN returns matching rows from both tables?",
+          "options": ["INNER JOIN", "FULL JOIN", "CROSS JOIN", "RIGHT JOIN"],
+          "correct": 0
+        },
+        {
+          "text": "What does ACID describe?",
+          "options": ["Database transactions", "Network protocols", "Programming languages", "Operating systems"],
+          "correct": 0
+        },
+        {
+          "text": "Which SQL clause is used to filter records?",
+          "options": ["ORDER BY", "GROUP BY", "WHERE", "SELECT"],
+          "correct": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "version": "1.0",
+  "generated_by": "ExamPro AI Question Generator",
+  "description": "BCA Computer Networks practice questions",
+  "exams": [
+    {
+      "title": "Computer Networks — Practice Set",
+      "subject": "Computer Networks",
+      "description": "OSI model, TCP/IP, protocols, devices aur networking concepts",
+      "duration": 30,
+      "passingScore": 60,
+      "questions": [
+        {
+          "text": "How many layers are present in the OSI model?",
+          "options": ["5", "6", "7", "8"],
+          "correct": 2
+        },
+        {
+          "text": "Which device connects different networks?",
+          "options": ["Hub", "Switch", "Router", "Repeater"],
+          "correct": 2
+        },
+        {
+          "text": "What is the full form of LAN?",
+          "options": ["Large Area Network", "Local Area Network", "Long Area Network", "Linked Area Network"],
+          "correct": 1
+        },
+        {
+          "text": "Which protocol is used for secure web communication?",
+          "options": ["HTTP", "HTTPS", "FTP", "SMTP"],
+          "correct": 1
+        },
+        {
+          "text": "Which protocol is mainly used to send emails?",
+          "options": ["SMTP", "FTP", "HTTP", "ARP"],
+          "correct": 0
+        },
+        {
+          "text": "Which layer of OSI model is responsible for routing?",
+          "options": ["Physical", "Data Link", "Network", "Transport"],
+          "correct": 2
+        },
+        {
+          "text": "Which device forwards data using MAC addresses?",
+          "options": ["Router", "Switch", "Modem", "Repeater"],
+          "correct": 1
+        },
+        {
+          "text": "What does IP stand for?",
+          "options": ["Internet Protocol", "Internal Protocol", "Internet Process", "Information Protocol"],
+          "correct": 0
+        },
+        {
+          "text": "Which protocol is used for transferring files?",
+          "options": ["FTP", "SMTP", "DNS", "DHCP"],
+          "correct": 0
+        },
+        {
+          "text": "Which protocol converts domain names into IP addresses?",
+          "options": ["HTTP", "DNS", "FTP", "TCP"],
+          "correct": 1
+        }
+      ]
+    }
+  ]
+}

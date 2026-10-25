@@ -1,0 +1,80 @@
+{
+  "version": "1.0",
+  "generated_by": "ExamPro AI Question Generator",
+  "description": "BCA exam questions — edit karo ya AI se generate karo",
+  "exams": [
+    {
+      "title": "Data Structures — Practice Set",
+      "subject": "Computer Science",
+      "description": "Arrays, Stacks, Queues, Trees aur Graphs ke basic questions",
+      "duration": 30,
+      "passingScore": 60,
+      "questions": [
+        {
+          "text": "Which data structure follows LIFO (Last In First Out) principle?",
+          "options": ["Queue", "Stack", "Array", "Linked List"],
+          "correct": 1
+        },
+        {
+          "text": "What is the time complexity of Binary Search?",
+          "options": ["O(n)", "O(n²)", "O(log n)", "O(n log n)"],
+          "correct": 2
+        },
+        {
+          "text": "Which traversal of a Binary Tree visits: Left → Root → Right?",
+          "options": ["Pre-order", "Post-order", "In-order", "Level-order"],
+          "correct": 2
+        },
+        {
+          "text": "A Queue follows which principle?",
+          "options": ["LIFO", "FIFO", "FILO", "LILO"],
+          "correct": 1
+        },
+        {
+          "text": "Which data structure is used in BFS (Breadth First Search)?",
+          "options": ["Stack", "Queue", "Tree", "Graph"],
+          "correct": 1
+        }
+      ]
+    },
+    {
+      "title": "DBMS — SQL Basics",
+      "subject": "Database Management",
+      "description": "SQL queries, normalization aur database concepts",
+      "duration": 30,
+      "passingScore": 60,
+      "questions": [
+        {
+          "text": "Which SQL command is used to retrieve data from a table?",
+          "options": ["INSERT", "UPDATE", "SELECT", "DELETE"],
+          "correct": 2
+        },
+        {
+          "text": "What does DDL stand for in SQL?",
+          "options": ["Data Definition Language", "Data Display Language", "Data Delivery Logic", "Database Design Language"],
+          "correct": 0
+        },
+        {
+          "text": "Which normal form eliminates partial dependencies?",
+          "options": ["1NF", "2NF", "3NF", "BCNF"],
+          "correct": 1
+        },
+        {
+          "text": "ACID in database transactions stands for?",
+          "options": [
+            "Atomicity, Consistency, Isolation, Durability",
+            "Access, Control, Integration, Data",
+            "Atomicity, Control, Integrity, Durability",
+            "Access, Consistency, Isolation, Data"
+          ],
+          "correct": 0
+        },
+        {
+          "text": "Which JOIN returns all rows from both tables including unmatched?",
+          "options": ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"],
+          "correct": 3
+        }
+      ]
+    }
+  ]
+}

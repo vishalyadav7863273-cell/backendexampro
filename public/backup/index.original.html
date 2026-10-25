@@ -1,0 +1,2737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamPro - Advanced Online Examination System</title>
+
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="mainNavbar">
+  <a class="navbar-brand" href="#" onclick="showPage('home')">
+    <div class="logo-icon">📝</div>     
+    ExamPro
+  </a>
+  <div class="navbar-nav" id="guestNav">
+    <button class="nav-btn" onclick="showPage('home')">Home</button>
+    <button class="nav-btn" onclick="showPage('courses')">📚 Courses</button>
+    <button class="nav-btn" onclick="showPage('login')">Login</button>
+    <button class="nav-btn" onclick="showPage('register')" style="background:var(--accent);border-color:var(--accent);color:var(--primary-dark);font-weight:700;">Register</button>
+  </div>
+  <div class="navbar-nav hidden" id="studentNav">
+    <button class="nav-btn" id="navStudentDash" onclick="showPage('studentDash')">Dashboard</button>
+    <button class="nav-btn" onclick="showPage('availableExams')">📋 Exams</button>
+    <button class="nav-btn" onclick="showPage('courses')">📚 Courses</button>
+    <button class="nav-btn" onclick="showPage('myResults')">📊 Results</button>
+    <button class="nav-btn" onclick="showPage('studentProfile')">👤 Profile</button>
+    <button class="nav-btn" onclick="logout()">Logout</button>
+  </div>
+  <div class="navbar-nav hidden" id="adminNav">
+    <button class="nav-btn active" onclick="showAdminTab('overview')">📊 Overview</button>
+    <button class="nav-btn" onclick="showAdminTab('manageExams')">📝 Exams</button>
+    <button class="nav-btn" onclick="showAdminTab('manageStudents')">👥 Students</button>
+    <button class="nav-btn" onclick="showAdminTab('manageResults')">📈 Results</button>
+    <button class="nav-btn" onclick="showPage('courses')">📚 Courses</button>
+    <a class="nav-btn" href="pages/generate_questions.html" target="_blank" style="text-decoration:none;background:linear-gradient(135deg,rgba(6,182,212,0.3),rgba(124,58,237,0.3));border-color:rgba(6,182,212,0.5);color:#22d3ee;font-weight:700;">🤖 AI Studio</a>
+    <button class="nav-btn" onclick="logout()">Logout</button>
+  </div>
+  <!-- DARK MODE TOGGLE — always visible -->
+  <button id="dmToggle" onclick="toggleDarkMode()" title="Toggle Dark Mode" style="
+    background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);
+    color:white;width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:1.1rem;
+    display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;
+    margin-left:8px;">🌙</button>
+</nav>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+
+<!-- =========================================================== -->
+<!-- HOME PAGE -->
+<!-- =========================================================== -->
+
+<div id="page-home" class="page active">
+
+  <!-- ===== HERO ===== -->
+  <div class="hp-hero">
+    <!-- Students Illustration SVG BG -->
+    <svg class="hp-classroom-bg" viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0f0520"/>
+          <stop offset="50%" stop-color="#1e0442"/>
+          <stop offset="100%" stop-color="#2e0659"/>
+        </linearGradient>
+        <radialGradient id="glow1" cx="25%" cy="60%" r="45%">
+          <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glow2" cx="75%" cy="55%" r="40%">
+          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glow3" cx="50%" cy="30%" r="35%">
+          <stop offset="0%" stop-color="#5b21b6" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#5b21b6" stop-opacity="0"/>
+        </radialGradient>
+        <!-- Skin tones -->
+        <linearGradient id="skin1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FDDBB4"/>
+          <stop offset="100%" stop-color="#F0B87E"/>
+        </linearGradient>
+        <linearGradient id="skin2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#C68642"/>
+          <stop offset="100%" stop-color="#A0522D"/>
+        </linearGradient>
+        <linearGradient id="skin3" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8D5524"/>
+          <stop offset="100%" stop-color="#6B3A1F"/>
+        </linearGradient>
+        <linearGradient id="skin4" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#F5CBA7"/>
+          <stop offset="100%" stop-color="#E59866"/>
+        </linearGradient>
+        <!-- Screen glows -->
+        <radialGradient id="screenGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Background -->
+      <rect width="1400" height="900" fill="url(#bgGrad)"/>
+      <rect width="1400" height="900" fill="url(#glow1)"/>
+      <rect width="1400" height="900" fill="url(#glow2)"/>
+      <rect width="1400" height="900" fill="url(#glow3)"/>
+
+      <!-- Grid lines subtle -->
+      <g opacity="0.04" stroke="#a78bfa" stroke-width="1">
+        <line x1="0" y1="150" x2="1400" y2="150"/>
+        <line x1="0" y1="300" x2="1400" y2="300"/>
+        <line x1="0" y1="450" x2="1400" y2="450"/>
+        <line x1="0" y1="600" x2="1400" y2="600"/>
+        <line x1="0" y1="750" x2="1400" y2="750"/>
+        <line x1="200" y1="0" x2="200" y2="900"/>
+        <line x1="400" y1="0" x2="400" y2="900"/>
+        <line x1="600" y1="0" x2="600" y2="900"/>
+        <line x1="800" y1="0" x2="800" y2="900"/>
+        <line x1="1000" y1="0" x2="1000" y2="900"/>
+        <line x1="1200" y1="0" x2="1200" y2="900"/>
+      </g>
+
+      <!-- Floating light orbs -->
+      <circle cx="200" cy="200" r="80" fill="#7c3aed" opacity="0.07"/>
+      <circle cx="1200" cy="300" r="100" fill="#06b6d4" opacity="0.06"/>
+      <circle cx="700" cy="150" r="60" fill="#a78bfa" opacity="0.08"/>
+
+      <!-- ═══════════════════════════════════════════════════
+           STUDENT 1 — Left: Girl with laptop, long hair
+      ═══════════════════════════════════════════════════ -->
+      <g transform="translate(110, 340)">
+        <!-- Desk -->
+        <rect x="-60" y="290" width="200" height="14" rx="5" fill="#2d1060" opacity="0.9"/>
+        <rect x="-40" y="304" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <rect x="110" y="304" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <!-- Laptop open -->
+        <rect x="-20" y="240" width="120" height="52" rx="6" fill="#1a1a2e"/>
+        <rect x="-14" y="245" width="108" height="42" rx="4" fill="#0d1b4a"/>
+        <!-- Screen content glow -->
+        <rect x="-14" y="245" width="108" height="42" rx="4" fill="#06b6d4" opacity="0.12"/>
+        <rect x="-2" y="250" width="70" height="5" rx="2" fill="#06b6d4" opacity="0.5"/>
+        <rect x="-2" y="259" width="50" height="3" rx="2" fill="#a78bfa" opacity="0.4"/>
+        <rect x="-2" y="266" width="60" height="3" rx="2" fill="#a78bfa" opacity="0.3"/>
+        <rect x="-2" y="273" width="40" height="3" rx="2" fill="#a78bfa" opacity="0.25"/>
+        <!-- MCQ option selected -->
+        <circle cx="75" cy="253" r="4" fill="#06b6d4" opacity="0.7"/>
+        <rect x="82" y="250" width="20" height="3" rx="1" fill="#06b6d4" opacity="0.5"/>
+        <!-- Laptop base -->
+        <rect x="-25" y="290" width="130" height="8" rx="3" fill="#0f0f23"/>
+        <!-- Body / torso -->
+        <rect x="5" y="175" width="70" height="75" rx="16" fill="#7c3aed"/>
+        <!-- Neck -->
+        <rect x="28" y="155" width="24" height="24" rx="8" fill="url(#skin4)"/>
+        <!-- Head -->
+        <ellipse cx="40" cy="140" rx="32" ry="35" fill="url(#skin4)"/>
+        <!-- Hair long — girl -->
+        <ellipse cx="40" cy="118" rx="34" ry="20" fill="#1a0a00"/>
+        <rect x="6" y="118" width="14" height="70" rx="7" fill="#1a0a00"/>
+        <rect x="60" y="118" width="14" height="70" rx="7" fill="#1a0a00"/>
+        <!-- Eyes -->
+        <ellipse cx="28" cy="138" rx="5" ry="6" fill="white"/>
+        <ellipse cx="52" cy="138" rx="5" ry="6" fill="white"/>
+        <circle cx="29" cy="139" r="3.5" fill="#2d1060"/>
+        <circle cx="53" cy="139" r="3.5" fill="#2d1060"/>
+        <circle cx="30" cy="137.5" r="1.2" fill="white"/>
+        <circle cx="54" cy="137.5" r="1.2" fill="white"/>
+        <!-- Eyebrows -->
+        <path d="M22 130 Q28 127 34 130" stroke="#3d2000" stroke-width="2" fill="none"/>
+        <path d="M46 130 Q52 127 58 130" stroke="#3d2000" stroke-width="2" fill="none"/>
+        <!-- Nose -->
+        <ellipse cx="40" cy="148" rx="3" ry="2" fill="#e0956a" opacity="0.5"/>
+        <!-- Smile -->
+        <path d="M32 155 Q40 162 48 155" stroke="#c0785a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Arms -->
+        <rect x="-12" y="185" width="22" height="60" rx="10" fill="#7c3aed" transform="rotate(-20,-12,185)"/>
+        <rect x="62" y="185" width="22" height="60" rx="10" fill="#7c3aed" transform="rotate(15,84,185)"/>
+        <!-- Hands -->
+        <ellipse cx="-8" cy="248" rx="10" ry="8" fill="url(#skin4)" transform="rotate(-20,-8,248)"/>
+        <ellipse cx="75" cy="248" rx="10" ry="8" fill="url(#skin4)" transform="rotate(15,75,248)"/>
+        <!-- Name badge -->
+        <rect x="10" y="210" width="60" height="20" rx="4" fill="rgba(255,255,255,0.12)"/>
+        <text x="40" y="224" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">PRIYA</text>
+        <!-- Floating score badge -->
+        <rect x="80" y="100" width="70" height="28" rx="8" fill="#059669" opacity="0.9"/>
+        <text x="115" y="119" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">Score 92%</text>
+        <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>
+      </g>
+
+      <!-- ═══════════════════════════════════════════════════
+           STUDENT 2 — Center-left: Boy writing exam, focused
+      ═══════════════════════════════════════════════════ -->
+      <g transform="translate(390, 300)">
+        <!-- Desk -->
+        <rect x="-70" y="330" width="220" height="14" rx="5" fill="#2d1060" opacity="0.9"/>
+        <rect x="-50" y="344" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <rect x="130" y="344" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <!-- Answer sheet / paper -->
+        <rect x="-40" y="268" width="150" height="65" rx="6" fill="#fffef5" opacity="0.92"/>
+        <line x1="-28" y1="280" x2="98" y2="280" stroke="#c0c0d0" stroke-width="1.5"/>
+        <line x1="-28" y1="292" x2="98" y2="292" stroke="#c0c0d0" stroke-width="1.5"/>
+        <line x1="-28" y1="304" x2="98" y2="304" stroke="#c0c0d0" stroke-width="1.5"/>
+        <line x1="-28" y1="316" x2="98" y2="316" stroke="#c0c0d0" stroke-width="1.5"/>
+        <!-- Written text lines -->
+        <rect x="-26" y="276" width="55" height="3" rx="1" fill="#3d2d8c" opacity="0.5"/>
+        <rect x="-26" y="288" width="80" height="3" rx="1" fill="#3d2d8c" opacity="0.4"/>
+        <rect x="-26" y="300" width="45" height="3" rx="1" fill="#3d2d8c" opacity="0.4"/>
+        <!-- Correct tick marks -->
+        <text x="-32" y="283" fill="#059669" font-size="11" font-weight="bold">✓</text>
+        <text x="-32" y="295" fill="#059669" font-size="11" font-weight="bold">✓</text>
+        <text x="-32" y="307" fill="#dc2626" font-size="11" font-weight="bold">✗</text>
+        <!-- Pen in hand -->
+        <rect x="95" y="290" width="5" height="38" rx="2" fill="#c0392b" transform="rotate(-25,95,310)"/>
+        <!-- Body -->
+        <rect x="-2" y="185" width="84" height="90" rx="16" fill="#1e40af"/>
+        <!-- Neck -->
+        <rect x="26" y="165" width="28" height="25" rx="8" fill="url(#skin2)"/>
+        <!-- Head -->
+        <ellipse cx="40" cy="148" rx="34" ry="36" fill="url(#skin2)"/>
+        <!-- Hair short — boy -->
+        <ellipse cx="40" cy="122" rx="35" ry="18" fill="#1a0500"/>
+        <!-- Head tilted slightly — looking at paper -->
+        <!-- Eyes focused down -->
+        <ellipse cx="26" cy="152" rx="5" ry="4" fill="white"/>
+        <ellipse cx="54" cy="152" rx="5" ry="4" fill="white"/>
+        <circle cx="28" cy="154" r="3" fill="#2d1060"/>
+        <circle cx="56" cy="154" r="3" fill="#2d1060"/>
+        <circle cx="29" cy="152.5" r="1" fill="white"/>
+        <circle cx="57" cy="152.5" r="1" fill="white"/>
+        <!-- Focused eyebrows — slightly furrowed -->
+        <path d="M20 143 Q26 140 32 143" stroke="#2d1000" stroke-width="2.5" fill="none"/>
+        <path d="M48 143 Q54 140 60 143" stroke="#2d1000" stroke-width="2.5" fill="none"/>
+        <!-- Nose -->
+        <ellipse cx="40" cy="160" rx="3.5" ry="2.5" fill="#b0713a" opacity="0.5"/>
+        <!-- Neutral mouth — concentrating -->
+        <path d="M32 168 Q40 171 48 168" stroke="#8B5E3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Arms writing -->
+        <rect x="65" y="210" width="24" height="72" rx="10" fill="#1e40af" transform="rotate(25,65,215)"/>
+        <rect x="-18" y="205" width="24" height="60" rx="10" fill="#1e40af" transform="rotate(-15,-5,210)"/>
+        <!-- Hands -->
+        <ellipse cx="92" cy="278" rx="11" ry="9" fill="url(#skin2)" transform="rotate(25,92,278)"/>
+        <ellipse cx="-20" cy="262" rx="11" ry="9" fill="url(#skin2)" transform="rotate(-15,-20,262)"/>
+        <!-- Roll number badge on desk -->
+        <rect x="-60" y="248" width="90" height="20" rx="4" fill="#5b21b6" opacity="0.8"/>
+        <text x="-15" y="262" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">BCA2025042</text>
+        <!-- Name -->
+        <rect x="5" y="200" width="70" height="20" rx="4" fill="rgba(255,255,255,0.1)"/>
+        <text x="40" y="214" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">RAHUL</text>
+      </g>
+
+      <!-- ═══════════════════════════════════════════════════
+           STUDENT 3 — Center: Girl, laptop + headphones
+      ═══════════════════════════════════════════════════ -->
+      <g transform="translate(670, 280)">
+        <!-- Desk -->
+        <rect x="-80" y="360" width="230" height="14" rx="5" fill="#2d1060" opacity="0.9"/>
+        <rect x="-60" y="374" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <rect x="130" y="374" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <!-- Laptop -->
+        <rect x="-50" y="290" width="160" height="72" rx="7" fill="#0f172a"/>
+        <rect x="-43" y="296" width="146" height="60" rx="5" fill="#0d2040"/>
+        <!-- Exam screen on laptop -->
+        <rect x="-43" y="296" width="146" height="60" rx="5" fill="#5b21b6" opacity="0.15"/>
+        <!-- Question text lines -->
+        <rect x="-35" y="303" width="90" height="5" rx="2" fill="#22d3ee" opacity="0.6"/>
+        <rect x="-35" y="312" width="70" height="4" rx="2" fill="#a78bfa" opacity="0.5"/>
+        <!-- Options -->
+        <circle cx="-28" cy="323" r="4" fill="rgba(255,255,255,0.15)"/>
+        <rect x="-20" y="320" width="45" height="3" rx="1" fill="rgba(255,255,255,0.3)"/>
+        <circle cx="-28" cy="333" r="4" fill="#06b6d4" opacity="0.8"/>
+        <rect x="-20" y="330" width="55" height="3" rx="1" fill="#06b6d4" opacity="0.5"/>
+        <!-- Selected option glow -->
+        <rect x="-34" y="327" width="120" height="12" rx="3" fill="#06b6d4" opacity="0.12"/>
+        <!-- Timer on screen -->
+        <rect x="68" y="300" width="32" height="14" rx="4" fill="#dc2626" opacity="0.7"/>
+        <text x="84" y="311" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">14:32</text>
+        <!-- Laptop base -->
+        <rect x="-55" y="360" width="170" height="8" rx="4" fill="#080d1a"/>
+        <!-- Headphones -->
+        <!-- Band over head -->
+        <path d="M-6 105 Q40 80 86 105" stroke="#5b21b6" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <!-- Left ear cup -->
+        <ellipse cx="-6" cy="118" rx="14" ry="16" fill="#7c3aed"/>
+        <!-- Right ear cup -->
+        <ellipse cx="86" cy="118" rx="14" ry="16" fill="#7c3aed"/>
+        <!-- Body / hoodie -->
+        <rect x="-5" y="200" width="90" height="100" rx="18" fill="#312e81"/>
+        <!-- Hoodie pocket -->
+        <rect x="15" y="268" width="50" height="28" rx="8" fill="#2e2a7a"/>
+        <!-- Neck -->
+        <rect x="25" y="175" width="30" height="28" rx="9" fill="url(#skin3)"/>
+        <!-- Head -->
+        <ellipse cx="40" cy="155" rx="36" ry="38" fill="url(#skin3)"/>
+        <!-- Hair — natural curly -->
+        <ellipse cx="40" cy="128" rx="38" ry="24" fill="#0a0a0a"/>
+        <ellipse cx="14" cy="140" rx="12" ry="18" fill="#0a0a0a"/>
+        <ellipse cx="66" cy="140" rx="12" ry="18" fill="#0a0a0a"/>
+        <!-- Eyes — engaged with screen -->
+        <ellipse cx="26" cy="158" rx="6" ry="7" fill="white"/>
+        <ellipse cx="54" cy="158" rx="6" ry="7" fill="white"/>
+        <circle cx="27" cy="160" r="4" fill="#1a0532"/>
+        <circle cx="55" cy="160" r="4" fill="#1a0532"/>
+        <circle cx="28" cy="158.5" r="1.5" fill="white"/>
+        <circle cx="56" cy="158.5" r="1.5" fill="white"/>
+        <!-- Eyebrows -->
+        <path d="M19 148 Q26 144 33 148" stroke="#1a0a00" stroke-width="2.5" fill="none"/>
+        <path d="M47 148 Q54 144 61 148" stroke="#1a0a00" stroke-width="2.5" fill="none"/>
+        <!-- Nose -->
+        <path d="M36 168 Q40 172 44 168" stroke="#6B3A1F" stroke-width="1.5" fill="none"/>
+        <!-- Small smile — focused happy -->
+        <path d="M30 175 Q40 182 50 175" stroke="#7B4A2F" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Arms -->
+        <rect x="-22" y="215" width="26" height="72" rx="11" fill="#312e81" transform="rotate(-18,-10,220)"/>
+        <rect x="75" y="215" width="26" height="72" rx="11" fill="#312e81" transform="rotate(12,88,220)"/>
+        <!-- Hands on laptop -->
+        <ellipse cx="-24" cy="282" rx="13" ry="9" fill="url(#skin3)" transform="rotate(-18,-24,282)"/>
+        <ellipse cx="95" cy="278" rx="13" ry="9" fill="url(#skin3)" transform="rotate(12,95,278)"/>
+        <!-- Name tag -->
+        <rect x="10" y="220" width="60" height="20" rx="4" fill="rgba(255,255,255,0.08)"/>
+        <text x="40" y="234" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">NEHA</text>
+        <!-- Floating bubble: "A+" -->
+        <circle cx="130" cy="80" r="26" fill="#059669" opacity="0.92"/>
+        <text x="130" y="88" text-anchor="middle" fill="white" font-size="18" font-weight="900" font-family="Arial">A+</text>
+        <animate attributeName="opacity" values="1;0.75;1" dur="2.5s" repeatCount="indefinite"/>
+      </g>
+
+      <!-- ═══════════════════════════════════════════════════
+           STUDENT 4 — Center-right: Boy, raising hand / thinking
+      ═══════════════════════════════════════════════════ -->
+      <g transform="translate(960, 310)">
+        <!-- Desk -->
+        <rect x="-70" y="330" width="210" height="14" rx="5" fill="#2d1060" opacity="0.9"/>
+        <rect x="-50" y="344" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <rect x="120" y="344" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <!-- Notebook open -->
+        <rect x="-55" y="264" width="130" height="68" rx="5" fill="#fffef5" opacity="0.88"/>
+        <!-- Notebook spine -->
+        <rect x="8" y="264" width="5" height="68" fill="#e0d0c0" opacity="0.7"/>
+        <!-- Left page lines -->
+        <line x1="-46" y1="278" x2="4" y2="278" stroke="#c8c0d8" stroke-width="1.2"/>
+        <line x1="-46" y1="288" x2="4" y2="288" stroke="#c8c0d8" stroke-width="1.2"/>
+        <line x1="-46" y1="298" x2="4" y2="298" stroke="#c8c0d8" stroke-width="1.2"/>
+        <line x1="-46" y1="308" x2="4" y2="308" stroke="#c8c0d8" stroke-width="1.2"/>
+        <line x1="-46" y1="318" x2="4" y2="318" stroke="#c8c0d8" stroke-width="1.2"/>
+        <!-- Right page lines -->
+        <line x1="18" y1="278" x2="66" y2="278" stroke="#c8c0d8" stroke-width="1.2"/>
+        <line x1="18" y1="288" x2="66" y2="288" stroke="#c8c0d8" stroke-width="1.2"/>
+        <line x1="18" y1="298" x2="66" y2="298" stroke="#c8c0d8" stroke-width="1.2"/>
+        <!-- Formula on right page -->
+        <text x="18" y="276" fill="#5b21b6" font-size="7" font-family="Arial">O(n log n)</text>
+        <text x="18" y="286" fill="#5b21b6" font-size="7" font-family="Arial">T(n)=2T(n/2)+n</text>
+        <!-- Body — shirt -->
+        <rect x="2" y="188" width="82" height="88" rx="16" fill="#0f766e"/>
+        <!-- Collar -->
+        <path d="M30 188 L43 208 L56 188" fill="#0d5c56"/>
+        <!-- Neck -->
+        <rect x="27" y="166" width="30" height="26" rx="8" fill="url(#skin1)"/>
+        <!-- Head -->
+        <ellipse cx="42" cy="148" rx="34" ry="37" fill="url(#skin1)"/>
+        <!-- Hair side-parted -->
+        <ellipse cx="42" cy="121" rx="35" ry="19" fill="#2c1a00"/>
+        <path d="M8 130 Q20 115 42 120 Q60 125 76 130" fill="#2c1a00"/>
+        <!-- Eyes — one hand on chin thinking -->
+        <ellipse cx="28" cy="150" rx="5.5" ry="6.5" fill="white"/>
+        <ellipse cx="56" cy="150" rx="5.5" ry="6.5" fill="white"/>
+        <circle cx="29" cy="152" r="3.8" fill="#1a0520"/>
+        <circle cx="57" cy="152" r="3.8" fill="#1a0520"/>
+        <circle cx="30" cy="150.5" r="1.3" fill="white"/>
+        <circle cx="58" cy="150.5" r="1.3" fill="white"/>
+        <!-- Eyebrows raised — thinking -->
+        <path d="M21 140 Q28 135 35 139" stroke="#2c1200" stroke-width="2.2" fill="none"/>
+        <path d="M49 139 Q56 134 63 138" stroke="#2c1200" stroke-width="2.2" fill="none"/>
+        <!-- Nose -->
+        <ellipse cx="42" cy="161" rx="3.5" ry="2" fill="#d4956a" opacity="0.4"/>
+        <!-- Hmm mouth — thinking -->
+        <path d="M33 170 Q42 167 51 170" stroke="#9B6A45" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Arm 1 — raised, hand on chin (thinking pose) -->
+        <rect x="60" y="198" width="26" height="68" rx="11" fill="#0f766e" transform="rotate(-45,73,210)"/>
+        <ellipse cx="55" cy="178" rx="13" ry="10" fill="url(#skin1)"/>
+        <!-- Arm 2 — resting on desk -->
+        <rect x="-15" y="215" width="26" height="75" rx="11" fill="#0f766e" transform="rotate(-10,-5,230)"/>
+        <ellipse cx="-22" cy="287" rx="13" ry="9" fill="url(#skin1)" transform="rotate(-10,-22,287)"/>
+        <!-- Thought bubble -->
+        <circle cx="120" cy="70" r="6" fill="rgba(255,255,255,0.25)"/>
+        <circle cx="132" cy="58" r="9" fill="rgba(255,255,255,0.25)"/>
+        <circle cx="148" cy="42" r="14" fill="rgba(255,255,255,0.2)"/>
+        <ellipse cx="148" cy="42" rx="30" ry="22" fill="rgba(255,255,255,0.15)"/>
+        <text x="148" y="37" text-anchor="middle" fill="white" font-size="9" font-family="Arial">BCA</text>
+        <text x="148" y="49" text-anchor="middle" fill="#22d3ee" font-size="9" font-weight="bold" font-family="Arial">2027</text>
+        <!-- Name tag -->
+        <rect x="12" y="218" width="60" height="20" rx="4" fill="rgba(255,255,255,0.08)"/>
+        <text x="42" y="232" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">ARYAN</text>
+      </g>
+
+      <!-- ═══════════════════════════════════════════════════
+           STUDENT 5 — Right: Girl, celebrating / finished
+      ═══════════════════════════════════════════════════ -->
+      <g transform="translate(1230, 320)">
+        <!-- Desk -->
+        <rect x="-70" y="320" width="190" height="14" rx="5" fill="#2d1060" opacity="0.9"/>
+        <rect x="-50" y="334" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <rect x="100" y="334" width="10" height="80" rx="3" fill="#1e0a42"/>
+        <!-- Tablet / phone on desk -->
+        <rect x="-40" y="265" width="90" height="58" rx="8" fill="#0f172a"/>
+        <rect x="-34" y="270" width="78" height="48" rx="6" fill="#1e1b4b"/>
+        <!-- Result on screen -->
+        <rect x="-34" y="270" width="78" height="48" rx="6" fill="#059669" opacity="0.15"/>
+        <text x="5" y="292" text-anchor="middle" fill="#34d399" font-size="13" font-weight="900" font-family="Arial">95%</text>
+        <text x="5" y="305" text-anchor="middle" fill="white" font-size="8" font-family="Arial">PASSED ✓</text>
+        <!-- Confetti / celebration -->
+        <rect x="-20" y="180" width="6" height="6" rx="1" fill="#f59e0b" transform="rotate(30,-17,183)"/>
+        <rect x="40" y="170" width="5" height="5" rx="1" fill="#06b6d4" transform="rotate(45,43,173)"/>
+        <rect x="80" y="185" width="6" height="6" rx="1" fill="#ec4899" transform="rotate(20,83,188)"/>
+        <rect x="0" y="160" width="4" height="8" rx="2" fill="#a78bfa" transform="rotate(60,2,164)"/>
+        <rect x="60" y="155" width="5" height="5" rx="1" fill="#34d399" transform="rotate(15,63,158)"/>
+        <rect x="-40" y="170" width="4" height="4" rx="1" fill="#f87171" transform="rotate(40,-37,173)"/>
+        <rect x="100" y="165" width="6" height="6" rx="1" fill="#fbbf24" transform="rotate(55,103,168)"/>
+        <!-- Stars -->
+        <text x="-30" y="165" fill="#f59e0b" font-size="14">★</text>
+        <text x="75" y="170" fill="#06b6d4" font-size="12">★</text>
+        <text x="25" y="148" fill="#a78bfa" font-size="16">★</text>
+        <!-- Body — kurta/dress -->
+        <rect x="0" y="190" width="80" height="88" rx="16" fill="#be185d"/>
+        <!-- Dupatta/scarf detail -->
+        <path d="M0 210 Q-15 230 -10 260 Q5 245 0 210" fill="#9d174d"/>
+        <!-- Neck -->
+        <rect x="26" y="170" width="28" height="24" rx="8" fill="url(#skin2)"/>
+        <!-- Head -->
+        <ellipse cx="40" cy="152" rx="34" ry="36" fill="url(#skin2)"/>
+        <!-- Hair — bun style -->
+        <ellipse cx="40" cy="127" rx="35" ry="20" fill="#0a0500"/>
+        <!-- Bun -->
+        <circle cx="40" cy="112" r="16" fill="#0a0500"/>
+        <circle cx="40" cy="107" r="10" fill="#1a0a00"/>
+        <!-- Hair pin decoration -->
+        <rect x="52" y="108" width="12" height="3" rx="1.5" fill="#f59e0b"/>
+        <!-- Eyes — happy/excited wide -->
+        <ellipse cx="26" cy="157" rx="6.5" ry="7.5" fill="white"/>
+        <ellipse cx="54" cy="157" rx="6.5" ry="7.5" fill="white"/>
+        <circle cx="27" cy="159" r="4.5" fill="#1a0520"/>
+        <circle cx="55" cy="159" r="4.5" fill="#1a0520"/>
+        <circle cx="28.5" cy="157" r="1.8" fill="white"/>
+        <circle cx="56.5" cy="157" r="1.8" fill="white"/>
+        <!-- Happy raised eyebrows -->
+        <path d="M18 145 Q26 140 34 144" stroke="#2c1000" stroke-width="2" fill="none"/>
+        <path d="M46 144 Q54 139 62 143" stroke="#2c1000" stroke-width="2" fill="none"/>
+        <!-- Nose -->
+        <ellipse cx="40" cy="166" rx="3" ry="2" fill="#b06040" opacity="0.4"/>
+        <!-- Big smile! -->
+        <path d="M27 176 Q40 188 53 176" stroke="#8B4513" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Teeth -->
+        <path d="M30 178 Q40 186 50 178 Q40 182 30 178" fill="white" opacity="0.7"/>
+        <!-- Arms raised in celebration -->
+        <rect x="68" y="195" width="26" height="72" rx="11" fill="#be185d" transform="rotate(-50,81,210)"/>
+        <rect x="-20" y="195" width="26" height="72" rx="11" fill="#be185d" transform="rotate(50,-7,210)"/>
+        <!-- Hands open -->
+        <ellipse cx="100" cy="152" rx="14" ry="11" fill="url(#skin2)" transform="rotate(-50,100,152)"/>
+        <ellipse cx="-20" cy="152" rx="14" ry="11" fill="url(#skin2)" transform="rotate(50,-20,152)"/>
+        <!-- Name tag -->
+        <rect x="10" y="218" width="60" height="20" rx="4" fill="rgba(255,255,255,0.08)"/>
+        <text x="40" y="232" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">SANYA</text>
+        <!-- Result popup -->
+        <rect x="-75" y="80" width="100" height="46" rx="10" fill="#059669" opacity="0.95"/>
+        <text x="-25" y="101" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">🎉 Cleared!</text>
+        <text x="-25" y="117" text-anchor="middle" fill="#d1fae5" font-size="9" font-family="Arial">Rank #1</text>
+      </g>
+
+      <!-- ═══════════════════════════════════════════════════
+           DECORATIVE ELEMENTS
+      ═══════════════════════════════════════════════════ -->
+      <!-- Floating icons -->
+      <g opacity="0.22">
+        <text x="50" y="250" font-size="28">💻</text>
+        <text x="1330" y="220" font-size="24">📚</text>
+        <text x="530" y="200" font-size="22">🎓</text>
+        <text x="850" y="180" font-size="20">✏️</text>
+      </g>
+
+      <!-- Animated particles -->
+      <circle cx="300" cy="150" r="3" fill="#a78bfa" opacity="0.4">
+        <animate attributeName="cy" values="150;130;150" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="750" cy="100" r="2.5" fill="#06b6d4" opacity="0.4">
+        <animate attributeName="cy" values="100;75;100" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="1100" cy="180" r="3" fill="#f59e0b" opacity="0.35">
+        <animate attributeName="cy" values="180;155;180" dur="5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.35;0.65;0.35" dur="5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="500" cy="800" r="2" fill="#a78bfa" opacity="0.3">
+        <animate attributeName="cy" values="800;780;800" dur="3.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="900" cy="820" r="2.5" fill="#06b6d4" opacity="0.3">
+        <animate attributeName="cy" values="820;795;820" dur="4.5s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Bottom glow line -->
+      <rect x="0" y="870" width="1400" height="30" fill="url(#bgGrad)" opacity="0.8"/>
+      <line x1="0" y1="860" x2="1400" y2="860" stroke="#5b21b6" stroke-width="1" opacity="0.3"/>
+
+    </svg>
+
+    <!-- Floating particles -->
+    <div class="hp-particles" id="heroParticles"></div>
+    <!-- Dark overlay -->
+    <div class="hp-overlay"></div>
+
+    <!-- Hero content -->
+    <div class="hp-hero-inner">
+      <div class="hp-hero-left">
+        <div class="hp-badge2">🎓 BCA Final Year Project 2027</div>
+        <h1 class="hp-h1">The Smartest Way to<br><span class="accent">Conduct Exams</span></h1>
+        <p class="hp-desc">Create, manage, and take online exams with real-time timers, instant auto-grading, detailed analytics, and a beautiful student portal </p>
+        <div class="hp-btns">
+          <button class="hp-btn-main" onclick="showPage('register')">🚀 Get Started Free</button>
+          <button class="hp-btn-ghost" onclick="showPage('login')">📋 Take an Exam</button>
+        </div>
+        <!-- Mini trust badges -->
+        <div style="display:flex;gap:20px;margin-top:32px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.55);font-size:0.8rem;">✅ No installation needed</div>
+          <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.55);font-size:0.8rem;">✅ Data saved locally</div>
+          <div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.55);font-size:0.8rem;">✅ Works offline</div>
+        </div>
+      </div>
+
+      <!-- Floating exam card mockup -->
+      <div class="hp-hero-right">
+        <div class="hp-mockup">
+          <div class="hp-mockup-header">
+            <div class="hp-mockup-icon">📝</div>
+            <div>
+              <div class="hp-mockup-title">Data Structures — Midterm</div>
+              <div class="hp-mockup-sub">Computer Science • 10 Questions</div>
+            </div>
+          </div>
+          <div class="hp-mock-q">
+            <div class="hp-mock-q-text">Q3. Which data structure uses LIFO principle?</div>
+            <div class="hp-mock-opt"><div class="hp-mock-dot"></div>Queue</div>
+            <div class="hp-mock-opt"><div class="hp-mock-dot"></div>Array</div>
+            <div class="hp-mock-opt sel"><div class="hp-mock-dot sel"></div>Stack ✓</div>
+            <div class="hp-mock-opt"><div class="hp-mock-dot"></div>Linked List</div>
+          </div>
+          <div class="hp-timer-bar">
+            <div class="hp-timer">⏱ 02:34</div>
+            <div class="hp-progress"><div class="hp-progress-fill"></div></div>
+            <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">7/10</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="hp-scroll-hint">
+      <span>Scroll Down</span>
+      <span class="hp-scroll-arrow">↓</span>
+    </div>
+  </div>
+
+  <!-- ===== STATS ===== -->
+  <div class="hp-stats">
+    <div class="hp-stats-inner">
+      <div class="hp-stat">
+        <span class="hp-stat-icon">👥</span>
+        <div class="hp-stat-num" id="statStudents">0</div>
+        <div class="hp-stat-label">Registered Students</div>
+      </div>
+      <div class="hp-stat">
+        <span class="hp-stat-icon">📝</span>
+        <div class="hp-stat-num" id="statExams">0</div>
+        <div class="hp-stat-label">Exams Created</div>
+      </div>
+      <div class="hp-stat">
+        <span class="hp-stat-icon">📋</span>
+        <div class="hp-stat-num" id="statAttempts">0</div>
+        <div class="hp-stat-label">Exam Attempts</div>
+      </div>
+      <div class="hp-stat">
+        <span class="hp-stat-icon">🏆</span>
+        <div class="hp-stat-num" id="statPass">0<span>%</span></div>
+        <div class="hp-stat-label">Overall Pass Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FEATURES ===== -->
+  <div class="hp-features-section">
+    <div class="hp-features-inner">
+      <div style="text-align:center;" class="reveal">
+        <div class="hp-section-tag">✨ Features</div>
+        <h2 class="hp-section-h2">Everything You Need for Online Exams</h2>
+        <p class="hp-section-p">A complete examination management system with powerful tools for both educators and students — click any feature to learn more.</p>
+      </div>
+      <div class="hp-feat-grid">
+        <div class="hp-feat-card reveal delay-1" onclick="openFeatureModal('timer')">
+          <div class="hp-feat-icon" style="background:#e8eaf6;">⏱️</div>
+          <h3>Timed Examinations</h3>
+          <p>Set custom time limits per exam. Live countdown timer with colour-coded alerts — yellow at 5 min, red at 1 min with auto-submit.</p>
+          <div class="hp-feat-link">Learn more →</div>
+        </div>
+        <div class="hp-feat-card reveal delay-2" onclick="openFeatureModal('grading')">
+          <div class="hp-feat-icon" style="background:#e0f7fa;">🤖</div>
+          <h3>Auto-Grading System</h3>
+          <p>Instant automatic grading on submission. Grades from A+ to F assigned immediately with a full per-question answer review.</p>
+          <div class="hp-feat-link">Learn more →</div>
+        </div>
+        <div class="hp-feat-card reveal delay-3" onclick="openFeatureModal('analytics')">
+          <div class="hp-feat-icon" style="background:#e8f5e9;">📊</div>
+          <h3>Analytics Dashboard</h3>
+          <p>Admin dashboard with student performance tracking, exam statistics, pass rates, and complete attempt history at a glance.</p>
+          <div class="hp-feat-link">Learn more →</div>
+        </div>
+        <div class="hp-feat-card reveal delay-4" onclick="openFeatureModal('security')">
+          <div class="hp-feat-icon" style="background:#fff8e1;">🔒</div>
+          <h3>Secure & Reliable</h3>
+          <p>Role-based access control with separate admin and student portals. All data stored persistently in IndexedDB — no server needed.</p>
+          <div class="hp-feat-link">Learn more →</div>
+        </div>
+        <div class="hp-feat-card reveal delay-5" onclick="openFeatureModal('responsive')">
+          <div class="hp-feat-icon" style="background:#fce4ec;">📱</div>
+          <h3>Responsive Design</h3>
+          <p>Fully responsive and mobile-friendly. Works on any device — desktop, tablet, or phone. No installation, just open and use.</p>
+          <div class="hp-feat-link">Learn more →</div>
+        </div>
+        <div class="hp-feat-card reveal delay-6" onclick="openFeatureModal('questions')">
+          <div class="hp-feat-icon" style="background:#f3e5f5;">🗂️</div>
+          <h3>Question Management</h3>
+          <p>Dynamic MCQ builder with unlimited questions, options, and a visual navigator grid. Flag questions for review during the exam.</p>
+          <div class="hp-feat-link">Learn more →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FEATURE INFO MODAL ===== -->
+  <div class="fmodal-overlay" id="featureModal" onclick="closeFeatureModal(event)">
+    <div class="fmodal-box">
+      <div style="padding:28px 28px 20px;display:flex;align-items:flex-start;gap:18px;">
+        <div id="fmIcon" style="width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <h3 id="fmTitle" style="font-size:1.2rem;font-weight:800;color:var(--primary);margin-bottom:5px;"></h3>
+          <p id="fmSubtitle" style="font-size:0.85rem;color:var(--text-muted);"></p>
+        </div>
+        <button onclick="document.getElementById('featureModal').classList.remove('open')" style="background:var(--bg);border:none;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;color:var(--text-muted);flex-shrink:0;">✕</button>
+      </div>
+      <div style="height:1px;background:var(--border);margin:0 28px;"></div>
+      <div id="fmBody" style="padding:22px 28px 28px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <div class="hp-how-section">
+    <div class="hp-how-inner">
+      <div style="text-align:center;" class="reveal">
+        <div class="hp-section-tag">📌 Process</div>
+        <h2 class="hp-section-h2">How ExamPro Works</h2>
+        <p class="hp-section-p">Simple four-step workflow — from account creation to instant results.</p>
+      </div>
+      <div class="hp-steps">
+        <div class="hp-step reveal delay-1">
+          <div class="hp-step-num">1</div>
+          <span class="hp-step-icon">📝</span>
+          <h4>Register / Login</h4>
+          <p>Create a student or admin account in seconds. Login is remembered across sessions.</p>
+        </div>
+        <div class="hp-step reveal delay-2">
+          <div class="hp-step-num">2</div>
+          <span class="hp-step-icon">🛠️</span>
+          <h4>Admin Creates Exam</h4>
+          <p>Add MCQ questions, set time limit, passing score, and activate the exam.</p>
+        </div>
+        <div class="hp-step reveal delay-3">
+          <div class="hp-step-num">3</div>
+          <span class="hp-step-icon">🎯</span>
+          <h4>Student Takes Exam</h4>
+          <p>Timed exam with live navigator, flag system, and smooth question flow.</p>
+        </div>
+        <div class="hp-step reveal delay-4">
+          <div class="hp-step-num">4</div>
+          <span class="hp-step-icon">🏆</span>
+          <h4>Instant Results</h4>
+          <p>Auto-graded with grade (A+ to F), score breakdown, and full answer review.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== QUOTE SECTION ===== -->
+  <div class="hp-quote-section">
+    <div class="hp-quote-inner reveal">
+      <div class="hp-quote-mark">"</div>
+      <p class="hp-quote-text" id="quoteText">Education is the most powerful weapon which you can use to change the world. Online exams make that education accessible to everyone, everywhere.</p>
+      <p class="hp-quote-author" id="quoteAuthor">— Nelson Mandela (adapted)</p>
+      <div class="hp-quote-dots">
+        <div class="hp-qdot active" onclick="changeQuote(0)"></div>
+        <div class="hp-qdot" onclick="changeQuote(1)"></div>
+        <div class="hp-qdot" onclick="changeQuote(2)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CTA SECTION ===== -->
+  <div class="hp-cta-section">
+    <div class="hp-cta-inner reveal">
+      <div class="hp-section-tag">🚀 Get Started</div>
+      <h2>Ready to Ace Your Exams?</h2>
+      <p>Join students already using ExamPro to practice, prepare, and perform. Create your account for free — no credit card, no installation needed.</p>
+      <div class="hp-cta-btns">
+        <button class="hp-cta-btn1" onclick="showPage('register')">🎓 Student Register</button>
+        <button class="hp-cta-btn2" onclick="showPage('login')">👨‍💼 Admin Login</button>
+      </div>
+      <p style="margin-top:20px;font-size:0.82rem;color:#9ca3af;">Admin credentials: admin@exam.com / admin123 &nbsp;•&nbsp; 3 sample exams pre-loaded</p>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="hp-footer">
+    <div class="hp-footer-inner">
+      <div>
+        <div class="hp-footer-brand"><div class="logo">📝</div>ExamPro</div>
+        <p class="hp-footer-desc">Advanced Online Examination System built as a BCA Final Year Project. Complete exam management with student and admin portals — all in one HTML file.</p>
+      </div>
+      <div class="hp-footer-col">
+        <h4>Students</h4>
+        <ul>
+          <li onclick="showPage('register')">Create Account</li>
+          <li onclick="showPage('login')">Sign In</li>
+          <li onclick="showPage('availableExams')">Browse Exams</li>
+          <li onclick="showPage('myResults')">My Results</li>
+        </ul>
+      </div>
+      <div class="hp-footer-col">
+        <h4>Admins</h4>
+        <ul>
+          <li onclick="showPage('login')">Admin Login</li>
+          <li onclick="showPage('adminPanel');showAdminTab('createExam')">Create Exams</li>
+          <li onclick="showPage('adminPanel');showAdminTab('manageStudents')">Manage Students</li>
+          <li onclick="showPage('adminPanel');showAdminTab('overview')">View Analytics</li>
+          <li><a href="pages/generate_questions.html" target="_blank" style="color:rgba(255,255,255,0.6);text-decoration:none;">🤖 AI Question Studio ↗</a></li>
+        </ul>
+      </div>
+      <div class="hp-footer-col">
+        <h4>Project Info</h4>
+        <ul>
+          <li>BCA Final Year 2027</li>
+          <li>HTML + CSS + JS</li>
+          <li>IndexedDB Storage</li>
+          <li>Single File App</li>
+        </ul>
+      </div>
+    </div>
+    <div class="hp-footer-bottom">
+      <p>© 2027 ExamPro — Advanced Online Examination System &nbsp;|&nbsp; BCA Final Year Project &nbsp;|&nbsp; All data stored locally in your browser</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- =========================================================== -->
+<!-- LOGIN PAGE -->
+<!-- =========================================================== -->
+
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page">
+  <div class="auth-page-wrap">
+
+    <!-- LEFT VISUAL PANEL -->
+    <div class="auth-left-panel">
+      <!-- animated orbs -->
+      <div class="alp-orb" style="width:200px;height:200px;background:rgba(0,188,212,0.12);top:-60px;left:-60px;animation-duration:6s;animation-delay:0s;"></div>
+      <div class="alp-orb" style="width:150px;height:150px;background:rgba(124,77,255,0.1);bottom:40px;right:-40px;animation-duration:8s;animation-delay:1s;"></div>
+      <div class="alp-orb" style="width:80px;height:80px;background:rgba(0,188,212,0.15);bottom:200px;left:30px;animation-duration:5s;animation-delay:2s;"></div>
+      <!-- grid dots bg -->
+      <svg class="alp-bg" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg" opacity="0.06">
+        <defs><pattern id="ldots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="white"/></pattern></defs>
+        <rect width="400" height="600" fill="url(#ldots)"/>
+      </svg>
+
+      <div class="alp-content">
+        <div class="alp-logo">🎓</div>
+        <div class="alp-brand">ExamPro</div>
+        <p class="alp-tagline">Your complete online examination platform. Take tests, track results, and grow every day.</p>
+
+        <div class="alp-pills">
+          <div class="alp-pill" style="animation-delay:0.1s;"><span class="alp-pill-icon">⏱️</span> Timed exams with auto-submit</div>
+          <div class="alp-pill" style="animation-delay:0.2s;"><span class="alp-pill-icon">🤖</span> Instant auto-grading (A+ to F)</div>
+          <div class="alp-pill" style="animation-delay:0.3s;"><span class="alp-pill-icon">📊</span> Detailed result analytics</div>
+          <div class="alp-pill" style="animation-delay:0.4s;"><span class="alp-pill-icon">💾</span> Data saved in your browser</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT FORM PANEL -->
+    <div class="auth-right-panel">
+      <div class="auth-form-box">
+        <span class="afb-icon">👋</span>
+        <h2>Welcome Back!</h2>
+        <p class="afb-sub">Sign in to your ExamPro account to continue your learning journey.</p>
+
+        <div id="loginAlert" class="hidden"></div>
+
+        <!-- Role tabs -->
+        <div class="afb-role-tabs">
+          <button class="afb-role-tab active" id="tabStudent" onclick="setLoginRole('student')">🎓 Student Login</button>
+          <button class="afb-role-tab" id="tabAdmin" onclick="setLoginRole('admin')">👨‍💼 Admin Login</button>
+        </div>
+
+        <div class="afb-group">
+          <label class="afb-label">Email Address</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">✉️</span>
+            <input class="afb-input" id="loginEmail" type="email" placeholder="Enter your email address" onkeydown="if(event.key==='Enter')doLogin()">
+          </div>
+        </div>
+
+        <div class="afb-group">
+          <label class="afb-label">Password</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">🔑</span>
+            <input class="afb-input" id="loginPass" type="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
+            <button class="afb-pw-toggle" onclick="togglePw('loginPass',this)" type="button">👁️</button>
+          </div>
+        </div>
+
+        <!-- forgot password -->
+        <div style="text-align:right;margin-top:-8px;margin-bottom:14px;">
+          <a onclick="showPage('forgotPassword')" style="font-size:0.8rem;color:#7c3aed;font-weight:600;cursor:pointer;text-decoration:none;">🔐 Forgot Password?</a>
+        </div>
+
+        <!-- admin hint -->
+        <div id="adminHint" class="hidden" style="background:#e8eaf6;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.8rem;color:#7c3aed;">
+          💡 <strong>Admin credentials:</strong> admin@exam.com / admin123
+        </div>
+
+        <button class="afb-submit" onclick="doLogin()">
+          🔐 Sign In to ExamPro
+        </button>
+
+        <div class="afb-divider">or</div>
+
+        <div class="afb-switch">
+          New student? <a onclick="showPage('register')">Create a free account →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- REGISTER PAGE -->
+<!-- =========================================================== -->
+<style>
+/* ===== REGISTER 3-COLUMN LAYOUT ===== */
+.reg-page-wrap {
+  min-height: calc(100vh - 64px);
+  display: grid;
+  grid-template-columns: 260px 1fr 300px;
+}
+@media(max-width:1024px){ .reg-page-wrap{ grid-template-columns:1fr 1fr; } .reg-courses-panel{ display:none; } }
+@media(max-width:680px) { .reg-page-wrap{ grid-template-columns:1fr; } .reg-left-panel{ display:none; } }
+
+/* Left brand panel */
+.reg-left-panel {
+  background: linear-gradient(160deg,#1e0442 0%,#3b0764 55%,#5b21b6 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 28px; position:relative; overflow:hidden;
+}
+.reg-left-panel .alp-bg { position:absolute;inset:0;z-index:0; }
+.reg-left-panel .alp-content { position:relative;z-index:1;text-align:center;color:white; }
+
+/* Middle form panel */
+.reg-form-panel {
+  background: #f5f3ff;
+  display:flex; align-items:center; justify-content:center;
+  padding:32px 28px; overflow-y:auto;
+}
+.reg-form-box {
+  background:white; border-radius:22px; padding:38px 36px;
+  width:100%; max-width:480px;
+  box-shadow:0 8px 40px rgba(91,33,182,0.1);
+  border:1px solid #ede9fe;
+  animation:formSlideUp 0.5s cubic-bezier(.22,1,.36,1) both;
+}
+.reg-form-box h2 { font-size:1.6rem; font-weight:900; color:#1e1b4b; margin-bottom:5px; letter-spacing:-0.5px; }
+.reg-form-box .afb-sub { font-size:0.85rem; color:#6b7280; margin-bottom:22px; line-height:1.5; }
+.reg-form-box .afb-icon { font-size:2.4rem; margin-bottom:10px; display:block; }
+
+/* ===== COURSES RIGHT PANEL ===== */
+.reg-courses-panel {
+  background: white;
+  border-left: 1.5px solid #ede9fe;
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.rcp-header {
+  background: linear-gradient(135deg,#3b0764,#7c3aed);
+  padding: 28px 22px 22px;
+  position: sticky; top: 0; z-index: 2;
+}
+.rcp-header-icon { font-size:1.8rem; margin-bottom:8px; display:block; }
+.rcp-header h3 { font-size:1.1rem; font-weight:900; color:white; margin-bottom:4px; }
+.rcp-header p  { font-size:0.78rem; color:rgba(255,255,255,0.7); line-height:1.5; }
+
+.rcp-body { padding:18px 16px; flex:1; }
+
+/* Semester group */
+.rcp-sem {
+  margin-bottom:18px;
+  border:1.5px solid #ede9fe; border-radius:14px; overflow:hidden;
+}
+.rcp-sem-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px; background:#f5f3ff; cursor:pointer;
+  border-bottom:1.5px solid #ede9fe; transition:background 0.2s;
+  user-select:none;
+}
+.rcp-sem-head:hover { background:#ede9fe; }
+.rcp-sem-title { font-size:0.82rem; font-weight:800; color:#3b0764; display:flex; align-items:center; gap:7px; }
+.rcp-sem-badge { background:linear-gradient(135deg,#5b21b6,#7c3aed); color:white; font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:20px; }
+.rcp-sem-arrow { font-size:0.75rem; color:#7c3aed; transition:transform 0.25s; }
+.rcp-sem-arrow.open { transform:rotate(180deg); }
+
+.rcp-subjects { display:none; padding:8px 10px 10px; }
+.rcp-subjects.open { display:flex; flex-direction:column; gap:6px; }
+
+.rcp-subject {
+  display:flex; align-items:center; gap:9px;
+  padding:9px 12px; border-radius:9px;
+  background:#fafafa; border:1px solid #f0ecff;
+  transition:all 0.2s; cursor:pointer;
+}
+.rcp-subject:hover { background:#f0ecff; border-color:#c4b5fd; }
+.rcp-subject-icon { font-size:1rem; flex-shrink:0; }
+.rcp-subject-info { flex:1; }
+.rcp-subject-name { font-size:0.8rem; font-weight:700; color:#1e1b4b; line-height:1.3; }
+.rcp-subject-code { font-size:0.68rem; color:#7c3aed; font-weight:600; margin-top:1px; }
+.rcp-subject-credits { font-size:0.68rem; color:#9ca3af; background:#f3f4f6; padding:1px 7px; border-radius:10px; white-space:nowrap; }
+
+/* dark mode courses panel */
+body.dark-mode .reg-courses-panel { background:#1a0d30; border-color:#2d1b4e; }
+body.dark-mode .rcp-sem { border-color:#2d1b4e; }
+body.dark-mode .rcp-sem-head { background:#200545; border-color:#2d1b4e; }
+body.dark-mode .rcp-sem-head:hover { background:#2d1b4e; }
+body.dark-mode .rcp-sem-title { color:#c4b5fd; }
+body.dark-mode .rcp-subject { background:#200545; border-color:#2d1b4e; }
+body.dark-mode .rcp-subject:hover { background:#2d1b4e; border-color:#7c3aed; }
+body.dark-mode .rcp-subject-name { color:#e9d5ff; }
+body.dark-mode .rcp-subject-credits { background:#2d1b4e; color:#a78bfa; }
+body.dark-mode .rcp-body { background:#1a0d30; }
+body.dark-mode .rcp-header p { color:rgba(255,255,255,0.65); }
+body.dark-mode .reg-form-panel { background:#100820; }
+body.dark-mode .reg-form-box { background:#1a0d30; border-color:#2d1b4e; }
+body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
+</style>
+
+<div id="page-register" class="page">
+  <div class="reg-page-wrap">
+
+    <!-- LEFT BRAND PANEL -->
+    <div class="reg-left-panel">
+      <div class="alp-orb" style="width:180px;height:180px;background:rgba(124,58,237,0.2);top:-50px;right:-40px;animation-duration:7s;"></div>
+      <div class="alp-orb" style="width:100px;height:100px;background:rgba(6,182,212,0.15);bottom:60px;left:-20px;animation-duration:9s;animation-delay:1s;"></div>
+      <svg class="alp-bg" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg" opacity="0.07">
+        <defs><pattern id="rdots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="white"/></pattern></defs>
+        <rect width="400" height="600" fill="url(#rdots)"/>
+      </svg>
+      <div class="alp-content">
+        <div class="alp-logo">🚀</div>
+        <div class="alp-brand">Join ExamPro</div>
+        <p class="alp-tagline">Register free. Access all exams. Track every result.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:220px;margin:0 auto;">
+          <div class="alp-pill" style="animation-delay:0.1s;font-size:0.78rem;"><span class="alp-pill-icon">1️⃣</span> Fill your details</div>
+          <div class="alp-pill" style="animation-delay:0.2s;font-size:0.78rem;"><span class="alp-pill-icon">2️⃣</span> Account instant banta hai</div>
+          <div class="alp-pill" style="animation-delay:0.3s;font-size:0.78rem;"><span class="alp-pill-icon">3️⃣</span> Exams browse karo</div>
+          <div class="alp-pill" style="animation-delay:0.4s;font-size:0.78rem;"><span class="alp-pill-icon">4️⃣</span> Results dekho</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE FORM PANEL -->
+    <div class="reg-form-panel">
+      <div class="reg-form-box">
+        <span class="afb-icon">✨</span>
+        <h2>Create Your Account</h2>
+        <p class="afb-sub">Join ExamPro as a student — completely free, takes under a minute.</p>
+
+        <div id="regAlert" class="hidden"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="afb-group">
+            <label class="afb-label">First Name</label>
+            <div class="afb-input-wrap">
+              <span class="afb-input-icon">👤</span>
+              <input class="afb-input" id="regFirst" type="text" placeholder="First name">
+            </div>
+          </div>
+          <div class="afb-group">
+            <label class="afb-label">Last Name</label>
+            <div class="afb-input-wrap">
+              <span class="afb-input-icon">👤</span>
+              <input class="afb-input" id="regLast" type="text" placeholder="Last name">
+            </div>
+          </div>
+        </div>
+
+        <div class="afb-group">
+          <label class="afb-label">Email Address</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">✉️</span>
+            <input class="afb-input" id="regEmail" type="email" placeholder="your@email.com">
+          </div>
+        </div>
+
+        <div class="afb-group">
+          <label class="afb-label">Roll Number / Student ID</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">🪪</span>
+            <input class="afb-input" id="regRoll" type="text" placeholder="e.g. BCA2025001">
+          </div>
+        </div>
+
+        <div class="afb-group">
+          <label class="afb-label">Course / Program</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">📚</span>
+            <select class="afb-select" id="regCourse">
+              <option value="">Select your course...</option>
+              <optgroup label="── BCA Courses ──">
+                <option>BCA - Bachelor of Computer Applications</option>
+                <option>BCA (Hons) - Bachelor of Computer Applications (Honours)</option>
+                <option>BCA (Cloud Computing)</option>
+                <option>BCA (Artificial Intelligence & ML)</option>
+                <option>BCA (Data Science)</option>
+                <option>BCA (Cyber Security)</option>
+              </optgroup>
+              <optgroup label="── Other Courses ──">
+                <option>MCA - Master of Computer Applications</option>
+                <option>BSc CS - Bachelor of Science in Computer Science</option>
+                <option>BTech - Computer Science Engineering</option>
+                <option>BBA - Bachelor of Business Administration</option>
+                <option>Other</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <div class="afb-group">
+          <label class="afb-label">Password</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">🔑</span>
+            <input class="afb-input" id="regPass" type="password" placeholder="Min 6 characters" oninput="checkPwStrength(this.value)">
+            <button class="afb-pw-toggle" onclick="togglePw('regPass',this)" type="button">👁️</button>
+          </div>
+          <div class="pw-strength" id="pwStrengthBars">
+            <div class="pw-bar" id="pb1"></div><div class="pw-bar" id="pb2"></div>
+            <div class="pw-bar" id="pb3"></div><div class="pw-bar" id="pb4"></div>
+          </div>
+          <div class="pw-label" id="pwLabel"></div>
+        </div>
+
+        <div class="afb-group">
+          <label class="afb-label">Confirm Password</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">🔒</span>
+            <input class="afb-input" id="regPass2" type="password" placeholder="Repeat your password">
+            <button class="afb-pw-toggle" onclick="togglePw('regPass2',this)" type="button">👁️</button>
+          </div>
+        </div>
+
+        <button class="afb-submit" style="background:linear-gradient(135deg,#3b0764,#7c3aed);" onclick="doRegister()">
+          🚀 Create My Account
+        </button>
+
+        <div class="afb-divider">already have an account?</div>
+        <div class="afb-switch"><a onclick="showPage('login')">← Back to Login</a></div>
+      </div>
+    </div><!-- end reg-form-panel -->
+
+    <!-- RIGHT — COURSES PANEL -->
+    <div class="reg-courses-panel">
+      <div class="rcp-header">
+        <span class="rcp-header-icon">🎓</span>
+        <h3>BCA Courses</h3>
+        <p>Semester-wise syllabus — click karo to auto-select course below</p>
+      </div>
+      <div class="rcp-body">
+
+        <!-- SEM 1 -->
+        <div class="rcp-sem">
+          <div class="rcp-sem-head" onclick="toggleSem(this)">
+            <div class="rcp-sem-title">📘 Semester 1 <span class="rcp-sem-badge">6 Subjects</span></div>
+            <span class="rcp-sem-arrow open">▼</span>
+          </div>
+          <div class="rcp-subjects open">
+            <div class="rcp-subject" onclick="selectCourseSubject('BCA - Bachelor of Computer Applications','Computer Fundamentals')">
+              <span class="rcp-subject-icon">💻</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Computer Fundamentals & PC Software</div><div class="rcp-subject-code">BCA-101</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject" onclick="selectCourseSubject('BCA - Bachelor of Computer Applications','C Programming')">
+              <span class="rcp-subject-icon">⌨️</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Programming in C</div><div class="rcp-subject-code">BCA-102</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📐</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Mathematics – I (Algebra & Calculus)</div><div class="rcp-subject-code">BCA-103</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🌐</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Business Communication</div><div class="rcp-subject-code">BCA-104</div></div>
+              <span class="rcp-subject-credits">3 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🔬</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Environmental Studies</div><div class="rcp-subject-code">BCA-105</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🧪</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">C Programming Lab</div><div class="rcp-subject-code">BCA-106P</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEM 2 -->
+        <div class="rcp-sem">
+          <div class="rcp-sem-head" onclick="toggleSem(this)">
+            <div class="rcp-sem-title">📗 Semester 2 <span class="rcp-sem-badge">6 Subjects</span></div>
+            <span class="rcp-sem-arrow">▼</span>
+          </div>
+          <div class="rcp-subjects">
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🗂️</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Data Structures using C</div><div class="rcp-subject-code">BCA-201</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🖥️</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Computer Organization & Architecture</div><div class="rcp-subject-code">BCA-202</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📊</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Mathematics – II (Discrete Maths)</div><div class="rcp-subject-code">BCA-203</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🌍</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Web Designing (HTML & CSS)</div><div class="rcp-subject-code">BCA-204</div></div>
+              <span class="rcp-subject-credits">3 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📝</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Technical Writing</div><div class="rcp-subject-code">BCA-205</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🧪</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Data Structures Lab</div><div class="rcp-subject-code">BCA-206P</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEM 3 -->
+        <div class="rcp-sem">
+          <div class="rcp-sem-head" onclick="toggleSem(this)">
+            <div class="rcp-sem-title">📙 Semester 3 <span class="rcp-sem-badge">6 Subjects</span></div>
+            <span class="rcp-sem-arrow">▼</span>
+          </div>
+          <div class="rcp-subjects">
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🗄️</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Database Management Systems</div><div class="rcp-subject-code">BCA-301</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">⚙️</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Operating Systems</div><div class="rcp-subject-code">BCA-302</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">☕</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Object Oriented Programming (Java)</div><div class="rcp-subject-code">BCA-303</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🔢</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Numerical Methods</div><div class="rcp-subject-code">BCA-304</div></div>
+              <span class="rcp-subject-credits">3 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📈</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Financial Accounting</div><div class="rcp-subject-code">BCA-305</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🧪</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">DBMS & Java Lab</div><div class="rcp-subject-code">BCA-306P</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEM 4 -->
+        <div class="rcp-sem">
+          <div class="rcp-sem-head" onclick="toggleSem(this)">
+            <div class="rcp-sem-title">📕 Semester 4 <span class="rcp-sem-badge">6 Subjects</span></div>
+            <span class="rcp-sem-arrow">▼</span>
+          </div>
+          <div class="rcp-subjects">
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🌐</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Computer Networks</div><div class="rcp-subject-code">BCA-401</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📱</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Visual Programming (.NET / VB)</div><div class="rcp-subject-code">BCA-402</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🔬</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Software Engineering</div><div class="rcp-subject-code">BCA-403</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📊</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Statistics & Probability</div><div class="rcp-subject-code">BCA-404</div></div>
+              <span class="rcp-subject-credits">3 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🏢</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">E-Commerce & ERP</div><div class="rcp-subject-code">BCA-405</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🧪</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Networking & VB Lab</div><div class="rcp-subject-code">BCA-406P</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEM 5 -->
+        <div class="rcp-sem">
+          <div class="rcp-sem-head" onclick="toggleSem(this)">
+            <div class="rcp-sem-title">📓 Semester 5 <span class="rcp-sem-badge">6 Subjects</span></div>
+            <span class="rcp-sem-arrow">▼</span>
+          </div>
+          <div class="rcp-subjects">
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🤖</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Artificial Intelligence</div><div class="rcp-subject-code">BCA-501</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🐍</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Python Programming</div><div class="rcp-subject-code">BCA-502</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🔐</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Cyber Security & Cryptography</div><div class="rcp-subject-code">BCA-503</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📱</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Mobile App Development</div><div class="rcp-subject-code">BCA-504</div></div>
+              <span class="rcp-subject-credits">3 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">☁️</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Cloud Computing</div><div class="rcp-subject-code">BCA-505</div></div>
+              <span class="rcp-subject-credits">3 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🧪</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Python & AI Lab</div><div class="rcp-subject-code">BCA-506P</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEM 6 -->
+        <div class="rcp-sem">
+          <div class="rcp-sem-head" onclick="toggleSem(this)">
+            <div class="rcp-sem-title">🏆 Semester 6 <span class="rcp-sem-badge">5 Subjects</span></div>
+            <span class="rcp-sem-arrow">▼</span>
+          </div>
+          <div class="rcp-subjects">
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">📊</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Data Science & Big Data Analytics</div><div class="rcp-subject-code">BCA-601</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🌐</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Internet of Things (IoT)</div><div class="rcp-subject-code">BCA-602</div></div>
+              <span class="rcp-subject-credits">4 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">💼</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">IT Project Management</div><div class="rcp-subject-code">BCA-603</div></div>
+              <span class="rcp-subject-credits">3 Credits</span>
+            </div>
+            <div class="rcp-subject">
+              <span class="rcp-subject-icon">🚀</span>
+              <div class="rcp-subject-info"><div class="rcp-subject-name">Entrepreneurship & Startup</div><div class="rcp-subject-code">BCA-604</div></div>
+              <span class="rcp-subject-credits">2 Credits</span>
+            </div>
+            <div class="rcp-subject" style="border-color:#7c3aed;background:linear-gradient(135deg,#f5f3ff,#ede9fe);">
+              <span class="rcp-subject-icon">📁</span>
+              <div class="rcp-subject-info">
+                <div class="rcp-subject-name" style="color:#5b21b6;">Final Year Project</div>
+                <div class="rcp-subject-code">BCA-605</div>
+              </div>
+              <span class="rcp-subject-credits" style="background:#ede9fe;color:#5b21b6;">6 Credits</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total credits card -->
+        <div style="background:linear-gradient(135deg,#3b0764,#7c3aed);border-radius:12px;padding:16px 18px;margin-top:4px;text-align:center;">
+          <div style="font-size:1.5rem;font-weight:900;color:white;">128</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.75);margin-top:2px;">Total Credits — BCA Program</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.55);margin-top:4px;">6 Semesters · 35 Subjects</div>
+        </div>
+
+      </div><!-- end rcp-body -->
+    </div><!-- end reg-courses-panel -->
+
+  </div><!-- end reg-page-wrap -->
+</div>
+
+<!-- =========================================================== -->
+<!-- STUDENT DASHBOARD -->
+<!-- =========================================================== -->
+<div id="page-studentDash" class="page">
+  <div class="dashboard">
+    <div class="dash-header">
+      <div>
+        <h2 id="sdWelcome">Welcome back! 👋</h2>
+        <p id="sdSubtitle">Here's your exam overview</p>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-blue btn-sm" onclick="showPage('availableExams')">📋 Browse Exams</button>
+        <button class="btn btn-sm" style="background:white;border:1.5px solid var(--border);" onclick="showPage('studentProfile')">👤 Profile</button>
+      </div>
+    </div>
+    <div class="dash-body">
+      <div class="dash-grid">
+        <div class="dash-card blue"><div class="dash-card-value" id="sdTotalExams">0</div><div class="dash-card-label">📋 Available Exams</div></div>
+        <div class="dash-card green"><div class="dash-card-value" id="sdAttempted">0</div><div class="dash-card-label">✅ Exams Attempted</div></div>
+        <div class="dash-card orange"><div class="dash-card-value" id="sdPassed">0</div><div class="dash-card-label">🏆 Exams Passed</div></div>
+        <div class="dash-card cyan"><div class="dash-card-value" id="sdAvgScore">0%</div><div class="dash-card-label">📊 Average Score</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-head">
+          <h3>📋 Recent Exam Attempts</h3>
+          <button class="btn btn-sm btn-blue" onclick="showPage('myResults')">View All</button>
+        </div>
+        <div id="sdRecentAttempts">
+          <div class="empty-state"><div class="empty-icon">📝</div><h3>No attempts yet</h3><p>Take your first exam to see results here</p></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-head"><h3>🔥 Available Exams</h3><button class="btn btn-sm btn-blue" onclick="showPage('availableExams')">Browse All</button></div>
+        <div id="sdUpcomingExams">
+          <div class="empty-state"><div class="empty-icon">📚</div><h3>No exams available</h3><p>Check back later for new exams</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- AVAILABLE EXAMS -->
+<!-- =========================================================== -->
+<div id="page-availableExams" class="page">
+  <div style="max-width:1100px;margin:0 auto;padding:28px 2rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div>
+        <h2 style="font-size:1.5rem;font-weight:700;color:var(--primary);">Available Exams</h2>
+        <p class="text-muted mt-1">Browse and attempt your exams</p>
+      </div>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" id="examSearch" placeholder="🔍 Search exams by name or subject..." oninput="filterExams()">
+      <select class="form-select" id="examSubjectFilter" onchange="filterExams()" style="width:200px;">
+        <option value="">All Subjects</option>
+      </select>
+    </div>
+    <div class="exam-list" id="examGrid">
+      <div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">📋</div><h3>No exams found</h3><p>Admin hasn't created any exams yet</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- EXAM TAKING -->
+<!-- =========================================================== -->
+<div id="page-takingExam" class="page">
+  <div class="exam-layout">
+    <div class="exam-main">
+      <div class="exam-header">
+        <div>
+          <div class="exam-title" id="examTitle">Exam Title</div>
+          <div class="exam-subtitle" id="examSubInfo">Subject • 30 Questions</div>
+        </div>
+        <div class="timer-box" id="timerBox">
+          <div class="timer-label">Time Left</div>
+          <div class="timer-display" id="timerDisplay">30:00</div>
+        </div>
+      </div>
+      <div id="questionArea"></div>
+      <div class="nav-controls">
+        <button class="btn btn-sm" id="prevBtn" onclick="prevQuestion()" style="background:white;border:1.5px solid var(--border);">← Previous</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" onclick="flagQuestion()" style="background:var(--warning-light);color:var(--warning);border:1px solid var(--warning);">🚩 Flag</button>
+          <button class="btn btn-sm btn-blue" id="nextBtn" onclick="nextQuestion()">Next →</button>
+        </div>
+        <button class="btn btn-success btn-sm" id="submitBtn" onclick="confirmSubmit()" disabled style="opacity:0.45;cursor:not-allowed;filter:grayscale(40%);" title="Pehle sare questions visit karo">✅ Submit Exam</button>
+      </div>
+      <div id="submitNotice" style="margin-top:10px;text-align:center;font-size:0.8rem;padding:8px 14px;background:var(--warning-light);color:var(--warning);border-radius:8px;border:1px solid #fcd34d;">
+        🔒 Submit unlock hoga jab sare questions visit ho jayenge
+      </div>
+    </div>
+    <div class="exam-sidebar">
+      <div class="q-grid-card">
+        <h4>Question Navigator</h4>
+        <div class="q-grid" id="qGrid"></div>
+        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
+          <div class="legend-row"><div class="legend-dot" style="background:var(--primary);"></div> Answered</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#e0f2fe;border:1.5px solid #0ea5e9;"></div> Visited</div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--warning-light);border:1px solid var(--warning);"></div> Flagged</div>
+          <div class="legend-row"><div class="legend-dot" style="background:white;border:1.5px solid var(--border);"></div> Not visited</div>
+        </div>
+      </div>
+      <div class="q-grid-card">
+        <h4>Summary</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:0.85rem;">
+          <div class="flex justify-between"><span>Total Questions</span><strong id="sumTotal">0</strong></div>
+          <div class="flex justify-between"><span>✅ Visited</span><strong id="sumVisited" style="color:var(--accent);">0/0</strong></div>
+          <div class="flex justify-between"><span>Answered</span><strong id="sumAnswered" style="color:var(--success);">0</strong></div>
+          <div class="flex justify-between"><span>Unanswered</span><strong id="sumUnanswered" style="color:var(--danger);">0</strong></div>
+          <div class="flex justify-between"><span>Flagged</span><strong id="sumFlagged" style="color:var(--warning);">0</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- RESULT PAGE -->
+<!-- =========================================================== -->
+<div id="page-result" class="page">
+  <div class="result-container">
+    <div class="result-header">
+      <div class="result-circle">
+        <div class="result-percent" id="rPercent">0%</div>
+        <div class="result-pct-label">Score</div>
+      </div>
+      <div class="result-grade" id="rGrade">F</div>
+      <div class="result-grade-label" id="rGradeLabel">Keep Practicing</div>
+      <p id="rExamName" style="margin-top:12px;opacity:0.85;font-size:0.95rem;"></p>
+    </div>
+    <div class="result-stats">
+      <div class="result-stat"><div class="val" id="rCorrect" style="color:var(--success);">0</div><div class="lbl">✅ Correct</div></div>
+      <div class="result-stat"><div class="val" id="rWrong" style="color:var(--danger);">0</div><div class="lbl">❌ Wrong</div></div>
+      <div class="result-stat"><div class="val" id="rSkipped" style="color:var(--warning);">0</div><div class="lbl">⏭️ Skipped</div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:24px;justify-content:center;">
+      <button class="btn btn-blue" onclick="showPage('availableExams')">📋 More Exams</button>
+      <button class="btn" style="background:white;border:1.5px solid var(--border);" onclick="showPage('myResults')">📊 All Results</button>
+    </div>
+    <div class="review-section" id="reviewSection"></div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- MY RESULTS -->
+<!-- =========================================================== -->
+<div id="page-myResults" class="page">
+  <div style="max-width:900px;margin:0 auto;padding:28px 2rem;">
+    <h2 style="font-size:1.5rem;font-weight:700;color:var(--primary);margin-bottom:4px;">My Results</h2>
+    <p class="text-muted mb-3">All your exam attempts and scores</p>
+    <div class="table-card">
+      <div id="myResultsTable">
+        <div class="empty-state"><div class="empty-icon">📊</div><h3>No results yet</h3><p>Complete an exam to see your results</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- STUDENT PROFILE -->
+<!-- =========================================================== -->
+<div id="page-studentProfile" class="page">
+  <div style="max-width:700px;margin:0 auto;padding:28px 2rem;">
+    <div class="profile-header">
+      <div class="profile-avatar" id="profAvatar">S</div>
+      <div class="profile-info">
+        <h2 id="profName">Student Name</h2>
+        <p id="profEmail">email@example.com</p>
+        <p id="profCourse" style="margin-top:4px;opacity:0.75;font-size:0.82rem;"></p>
+      </div>
+    </div>
+    <div class="create-exam-form">
+      <h3 style="font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:20px;">Edit Profile</h3>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="editFirst" type="text"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="editLast" type="text"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Roll Number</label><input class="form-input" id="editRoll" type="text" readonly style="background:#f0f2f5;"></div>
+      <div class="form-group"><label class="form-label">Course</label><input class="form-input" id="editCourse" type="text" readonly style="background:#f0f2f5;"></div>
+      <div class="form-group"><label class="form-label">New Password (leave blank to keep current)</label><input class="form-input" id="editPass" type="password" placeholder="New password..."></div>
+      <button class="btn btn-blue" onclick="saveProfile()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- ADMIN PANEL -->
+<!-- =========================================================== -->
+<div id="page-adminPanel" class="page">
+  <div class="admin-layout">
+    <div class="admin-sidebar">
+      <div style="padding:16px 20px 8px;font-size:1.05rem;font-weight:700;color:white;">Admin Panel</div>
+      <div class="sidebar-section">Main</div>
+      <div class="sidebar-item active" id="sideOverview" onclick="showAdminTab('overview')"><span class="sidebar-icon">📊</span> Overview</div>
+      <div class="sidebar-section">Management</div>
+      <div class="sidebar-item" id="sideExams" onclick="showAdminTab('manageExams')"><span class="sidebar-icon">📝</span> Manage Exams</div>
+      <div class="sidebar-item" id="sideCreateExam" onclick="showAdminTab('createExam')"><span class="sidebar-icon">➕</span> Create Exam</div>
+      <div class="sidebar-item" id="sideStudents" onclick="showAdminTab('manageStudents')"><span class="sidebar-icon">👥</span> Students</div>
+      <div class="sidebar-item" id="sideResults" onclick="showAdminTab('manageResults')"><span class="sidebar-icon">📈</span> Results</div>
+      <div class="sidebar-section">Account</div>
+      <div class="sidebar-item" onclick="logout()"><span class="sidebar-icon">🚪</span> Logout</div>
+    </div>
+    <div class="admin-content" id="adminContent">
+      <!-- Content loaded dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- MODALS -->
+<!-- =========================================================== -->
+<div class="modal-overlay hidden" id="submitModal">
+  <div class="modal-box">
+    <h3>⚠️ Submit Exam?</h3>
+    <p id="submitModalMsg">Are you sure you want to submit? You cannot change answers after submission.</p>
+    <div class="modal-btns">
+      <button class="btn btn-sm" onclick="closeModal('submitModal')" style="background:white;border:1.5px solid var(--border);">Cancel</button>
+      <button class="btn btn-success btn-sm" onclick="submitExam()">✅ Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="deleteExamModal">
+  <div class="modal-box">
+    <h3>🗑️ Delete Exam?</h3>
+    <p>This will permanently delete the exam and all its questions. Student results will be kept. This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="btn btn-sm" onclick="closeModal('deleteExamModal')" style="background:white;border:1.5px solid var(--border);">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteExam()">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="startExamModal">
+  <div class="modal-box">
+    <h3 id="startExamTitle">📝 Start Exam?</h3>
+    <p id="startExamDesc">Please read the instructions before starting.</p>
+    <div id="startExamInfo" style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;font-size:0.85rem;line-height:1.8;"></div>
+    <div class="modal-btns">
+      <button class="btn btn-sm" onclick="closeModal('startExamModal')" style="background:white;border:1.5px solid var(--border);">Cancel</button>
+      <button class="btn btn-blue btn-sm" onclick="beginExam()">🚀 Start Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- JAVASCRIPT -->
+<!-- =========================================================== -->
+
+<!-- ================================================================ -->
+<!-- NEW PAGES STYLES -->
+<!-- ================================================================ -->
+
+<!-- ================================================================ -->
+<!-- ABOUT PAGE -->
+<!-- ================================================================ -->
+<div id="page-about" class="page">
+  <div class="about-hero">
+    <h1 class="reveal">About <span>ExamPro</span></h1>
+    <p class="reveal delay-1">A professionally built Advanced Online Examination System — designed as a BCA Final Year Project to demonstrate full-stack web development skills using only HTML, CSS, and JavaScript.</p>
+  </div>
+
+  <div class="about-section" style="background:#f5f7ff;">
+    <div class="about-inner">
+      <div class="about-mission reveal">
+        <div class="mission-text">
+          <div class="hp-section-tag" style="margin-bottom:14px;">🎯 Our Mission</div>
+          <h2>Built to Make Exams Smarter</h2>
+          <p>ExamPro was conceived to solve a real problem — traditional paper-based exams are slow, error-prone, and hard to manage. We built a complete digital alternative that works right in your browser, with zero setup.</p>
+          <p>From creating exams to tracking student results, every feature is designed with both educators and students in mind. The system uses IndexedDB for persistent storage, meaning your data is always safe — even without internet.</p>
+          <div class="tech-stack">
+            <div class="tech-pill">🌐 HTML5</div>
+            <div class="tech-pill">🎨 CSS3</div>
+            <div class="tech-pill">⚡ Vanilla JS</div>
+            <div class="tech-pill">🗄️ IndexedDB</div>
+            <div class="tech-pill">📱 Responsive</div>
+            <div class="tech-pill">🔒 Role-Based Auth</div>
+          </div>
+        </div>
+        <div class="mission-stats">
+          <div class="ms-card reveal delay-1"><div class="ms-num" id="abStudents">0</div><div class="ms-label">Students Registered</div></div>
+          <div class="ms-card reveal delay-2"><div class="ms-num" id="abExams">0</div><div class="ms-label">Exams Available</div></div>
+          <div class="ms-card reveal delay-3"><div class="ms-num" id="abAttempts">0</div><div class="ms-label">Total Attempts</div></div>
+          <div class="ms-card reveal delay-4"><div class="ms-num">100%</div><div class="ms-label">Free to Use</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-section">
+    <div class="about-inner">
+      <div style="text-align:center;margin-bottom:8px;" class="reveal">
+        <div class="hp-section-tag">👨‍💻 Project Team</div>
+        <h2 class="hp-section-h2">The People Behind ExamPro</h2>
+        <p class="hp-section-p">BCA Final Year students who built every feature from scratch — no frameworks, no shortcuts.</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card reveal delay-1">
+          <div class="team-avatar">A</div>
+          <div class="team-name">Uu (Student)</div>
+          <div class="team-role">Lead Developer</div>
+          <p class="team-bio">Designed and developed the complete ExamPro system — UI/UX, database layer, exam engine, and admin panel — as the BCA Final Year project.</p>
+        </div>
+        <div class="team-card reveal delay-2">
+          <div class="team-avatar" style="background:linear-gradient(135deg,#0c4a6e,#0e7490);">G</div>
+          <div class="team-name">Project Guide</div>
+          <div class="team-role">Faculty Mentor</div>
+          <p class="team-bio">Provided guidance on system architecture, project scope, and evaluation criteria throughout the development cycle.</p>
+        </div>
+        <div class="team-card reveal delay-3">
+          <div class="team-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">D</div>
+          <div class="team-name">Department of CS</div>
+          <div class="team-role">Supporting Institution</div>
+          <p class="team-bio">Bachelor of Computer Applications department that provided the academic framework and evaluation support for this final year project.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-section" style="background:#f5f7ff;">
+    <div class="about-inner">
+      <div style="text-align:center;" class="reveal">
+        <div class="hp-section-tag">🛠️ How It's Built</div>
+        <h2 class="hp-section-h2">Technical Architecture</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px;">
+        <div class="hp-feat-card reveal delay-1" style="cursor:default;">
+          <div class="hp-feat-icon" style="background:#e8eaf6;">🗄️</div>
+          <h3>IndexedDB Storage</h3>
+          <p>All users, exams, and results are stored in IndexedDB — a powerful browser-native database. Data persists across sessions without any server.</p>
+        </div>
+        <div class="hp-feat-card reveal delay-2" style="cursor:default;">
+          <div class="hp-feat-icon" style="background:#e0f7fa;">🎨</div>
+          <h3>Pure CSS Design</h3>
+          <p>Every animation, layout, and visual effect is hand-crafted in CSS — no frameworks like Bootstrap or Tailwind. Fully custom design system.</p>
+        </div>
+        <div class="hp-feat-card reveal delay-3" style="cursor:default;">
+          <div class="hp-feat-icon" style="background:#e8f5e9;">⚡</div>
+          <h3>Vanilla JavaScript</h3>
+          <p>All logic — from authentication to exam grading — is written in plain JavaScript. No jQuery, no React. Single HTML file, zero dependencies.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- CONTACT PAGE -->
+<!-- ================================================================ -->
+<div id="page-contact" class="page">
+  <div class="contact-hero">
+    <h1 class="reveal">Get in <span>Touch</span></h1>
+    <p class="reveal delay-1">Have questions, feedback, or want to report an issue? We'd love to hear from you. Fill the form and we'll get back to you soon.</p>
+  </div>
+
+  <div class="contact-layout">
+    <div class="contact-info-card reveal left">
+      <h3>Contact Information</h3>
+      <p>Reach out through any of the channels below or use the contact form to send a message directly.</p>
+      <div class="ci-item">
+        <div class="ci-icon">📧</div>
+        <div class="ci-text"><strong>Email</strong><span>exampro.project@bca.edu.in</span></div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-icon">🏫</div>
+        <div class="ci-text"><strong>Department</strong><span>Bachelor of Computer Applications</span></div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-icon">📍</div>
+        <div class="ci-text"><strong>Location</strong><span>Computer Lab, Block B, Campus</span></div>
+      </div>
+      <div class="ci-item">
+        <div class="ci-icon">🕐</div>
+        <div class="ci-text"><strong>Project Year</strong><span>BCA Final Year — 2027</span></div>
+      </div>
+      <div class="social-row">
+        <button class="soc-btn" title="GitHub">💻</button>
+        <button class="soc-btn" title="LinkedIn">💼</button>
+        <button class="soc-btn" title="Email">📧</button>
+        <button class="soc-btn" title="Phone">📱</button>
+      </div>
+    </div>
+
+    <div class="contact-form-card reveal right">
+      <h3>Send a Message</h3>
+      <p class="cf-sub">Fill in the details below and we'll respond within 24 hours.</p>
+      <div id="contactSuccess" class="hidden" style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:10px;padding:14px 18px;margin-bottom:18px;color:#059669;font-size:0.88rem;display:flex;align-items:center;gap:8px;">✅ Message sent successfully! We'll get back to you soon.</div>
+      <div class="cf-row">
+        <div class="cf-group"><label class="cf-label">Your Name *</label><input class="cf-input" id="cfName" placeholder="Full name"></div>
+        <div class="cf-group"><label class="cf-label">Email *</label><input class="cf-input" id="cfEmail" type="email" placeholder="your@email.com"></div>
+      </div>
+      <div class="cf-group"><label class="cf-label">Subject *</label>
+        <select class="cf-select" id="cfSubject">
+          <option value="">Select a topic...</option>
+          <option>General Inquiry</option>
+          <option>Report a Bug</option>
+          <option>Feature Request</option>
+          <option>Exam Related Issue</option>
+          <option>Account Problem</option>
+          <option>Project Collaboration</option>
+        </select>
+      </div>
+      <div class="cf-group"><label class="cf-label">Message *</label><textarea class="cf-input cf-textarea" id="cfMsg" placeholder="Describe your query or feedback in detail..."></textarea></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <input type="checkbox" id="cfCopy" style="width:16px;height:16px;">
+        <label for="cfCopy" style="font-size:0.82rem;color:#6b7280;cursor:pointer;">Send me a copy of this message</label>
+      </div>
+      <button class="cf-btn" onclick="submitContact()">📨 Send Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- LEADERBOARD PAGE -->
+<!-- ================================================================ -->
+<div id="page-leaderboard" class="page">
+  <div class="lb-hero">
+    <h1 class="reveal">🏆 <span>Leaderboard</span></h1>
+    <p class="reveal delay-1">Top-performing students ranked by average exam score. Keep attempting and climb the ranks!</p>
+  </div>
+
+  <div class="lb-inner">
+    <div class="lb-filters" id="lbFilters">
+      <button class="lb-filter-btn active" onclick="filterLeaderboard('all',this)">🌐 All Exams</button>
+    </div>
+    <!-- Podium -->
+    <div class="lb-podium reveal" id="lbPodium">
+      <div style="text-align:center;color:#6b7280;font-size:0.9rem;padding:40px;">No data yet — attempt exams to appear here!</div>
+    </div>
+    <!-- Full table -->
+    <div class="lb-table-wrap reveal delay-1" id="lbTable">
+      <div style="padding:32px;text-align:center;color:#9ca3af;font-size:0.9rem;">Complete an exam to see rankings</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- NOTICE BOARD PAGE -->
+<!-- ================================================================ -->
+<div id="page-notices" class="page">
+  <div class="nb-hero">
+    <h1 class="reveal">📋 Notice <span>Board</span></h1>
+    <p class="reveal delay-1">Stay updated with important announcements, exam schedules, and news from the ExamPro team.</p>
+  </div>
+
+  <div class="nb-inner">
+    <div id="adminNoticeForm" class="hidden admin-notice-form">
+      <h4>📢 Post New Notice (Admin)</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <input class="cf-input" id="ntTitle" placeholder="Notice title *">
+        <select class="cf-select" id="ntType">
+          <option value="info">ℹ️ Info</option>
+          <option value="urgent">🚨 Urgent</option>
+          <option value="success">✅ Good News</option>
+          <option value="warning">⚠️ Warning</option>
+        </select>
+        <input class="cf-input" id="ntAuthor" placeholder="Posted by (e.g. Admin)">
+      </div>
+      <textarea class="cf-input cf-textarea" id="ntBody" placeholder="Notice content..." style="min-height:80px;margin-bottom:12px;"></textarea>
+      <button onclick="postNotice()" style="background:linear-gradient(135deg,#0c4a6e,#0e7490);color:white;border:none;padding:10px 24px;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.9rem;">📌 Post Notice</button>
+    </div>
+
+    <div class="nb-layout">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h3 style="font-size:1.1rem;font-weight:800;color:#3b0764;">All Notices</h3>
+          <div style="display:flex;gap:8px;">
+            <input class="cf-input" id="noticeSearch" placeholder="🔍 Search notices..." style="width:200px;padding:8px 14px;" oninput="renderNotices()">
+          </div>
+        </div>
+        <div id="noticesList"></div>
+      </div>
+
+      <div>
+        <div class="nb-widget">
+          <h4>📂 Categories</h4>
+          <div class="nb-cat-btn active" onclick="filterNotices('all',this)">📋 All Notices <span class="nb-cat-count" id="catAll">0</span></div>
+          <div class="nb-cat-btn" onclick="filterNotices('urgent',this)">🚨 Urgent <span class="nb-cat-count" id="catUrgent">0</span></div>
+          <div class="nb-cat-btn" onclick="filterNotices('info',this)">ℹ️ Info <span class="nb-cat-count" id="catInfo">0</span></div>
+          <div class="nb-cat-btn" onclick="filterNotices('success',this)">✅ Good News <span class="nb-cat-count" id="catSuccess">0</span></div>
+          <div class="nb-cat-btn" onclick="filterNotices('warning',this)">⚠️ Warning <span class="nb-cat-count" id="catWarning">0</span></div>
+        </div>
+
+        <div class="nb-widget">
+          <h4>📅 Upcoming Exams</h4>
+          <div id="sidebarExams"><div style="font-size:0.82rem;color:#9ca3af;">Loading...</div></div>
+        </div>
+
+        <div class="nb-widget" style="background:linear-gradient(135deg,#3b0764,#7c3aed);border-color:transparent;">
+          <h4 style="color:white;">🎯 Quick Links</h4>
+          <div class="nb-mini-item" onclick="showPage('availableExams')" style="border-color:rgba(255,255,255,0.1);">
+            <div class="nb-mini-icon" style="background:rgba(255,255,255,0.1);">📝</div>
+            <div><div class="nb-mini-text" style="color:white;">Browse Exams</div><div class="nb-mini-sub" style="color:rgba(255,255,255,0.55);">Attempt available tests</div></div>
+          </div>
+          <div class="nb-mini-item" onclick="showPage('leaderboard')" style="border-color:rgba(255,255,255,0.1);">
+            <div class="nb-mini-icon" style="background:rgba(255,255,255,0.1);">🏆</div>
+            <div><div class="nb-mini-text" style="color:white;">Leaderboard</div><div class="nb-mini-sub" style="color:rgba(255,255,255,0.55);">See top performers</div></div>
+          </div>
+          <div class="nb-mini-item" onclick="showPage('myResults')" style="border-bottom:none;border-color:rgba(255,255,255,0.1);">
+            <div class="nb-mini-icon" style="background:rgba(255,255,255,0.1);">📊</div>
+            <div><div class="nb-mini-text" style="color:white;">My Results</div><div class="nb-mini-sub" style="color:rgba(255,255,255,0.55);">Your exam history</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ================================================================ -->
+<!-- DARK MODE CSS -->
+<!-- ================================================================ -->
+
+<!-- ================================================================ -->
+<!-- FORGOT PASSWORD PAGE -->
+<!-- ================================================================ -->
+
+<div id="page-forgotPassword" class="page">
+  <div class="fp-wrap">
+    <div class="fp-box">
+
+      <!-- Step bar -->
+      <div class="fp-step-bar">
+        <div class="fp-step-item">
+          <div class="fp-step-circle active" id="fpCircle1">1</div>
+          <span>Enter Email</span>
+        </div>
+        <div class="fp-step-line" id="fpLine1"></div>
+        <div class="fp-step-item">
+          <div class="fp-step-circle" id="fpCircle2">2</div>
+          <span>Verify OTP</span>
+        </div>
+        <div class="fp-step-line" id="fpLine2"></div>
+        <div class="fp-step-item">
+          <div class="fp-step-circle" id="fpCircle3">3</div>
+          <span>New Password</span>
+        </div>
+      </div>
+
+      <div id="fpAlert" class="hidden"></div>
+
+      <!-- STEP 1 — Email -->
+      <div class="fp-step-panel active" id="fpStep1">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="font-size:2.8rem;margin-bottom:12px;">🔐</div>
+          <h2 style="font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:8px;">Forgot Password?</h2>
+          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;">No worries! Enter your registered email address and we'll send you a 6-digit OTP to recover your account.</p>
+        </div>
+        <div class="afb-group">
+          <label class="afb-label">Registered Email Address</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">✉️</span>
+            <input class="afb-input" id="fpEmail" type="email" placeholder="Enter your registered email" onkeydown="if(event.key==='Enter')sendOTP()">
+          </div>
+        </div>
+        <button class="fp-btn" onclick="sendOTP()">📨 Send OTP to Email</button>
+        <button class="fp-btn-ghost" onclick="showPage('login')">← Back to Login</button>
+      </div>
+
+      <!-- STEP 2 — OTP Verification -->
+      <div class="fp-step-panel" id="fpStep2">
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:2.8rem;margin-bottom:12px;">📲</div>
+          <h2 style="font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:8px;">Enter OTP</h2>
+          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;">We've sent a 6-digit verification code to:</p>
+        </div>
+        <div class="fp-email-display" id="fpEmailDisplay">—</div>
+        <p style="text-align:center;font-size:0.82rem;color:var(--text-muted);margin-bottom:4px;">Enter the 6-digit code below</p>
+        <div class="otp-row" id="otpRow">
+          <input class="otp-box" maxlength="1" id="otp0" oninput="otpInput(0)" onkeydown="otpKey(event,0)" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" id="otp1" oninput="otpInput(1)" onkeydown="otpKey(event,1)" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" id="otp2" oninput="otpInput(2)" onkeydown="otpKey(event,2)" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" id="otp3" oninput="otpInput(3)" onkeydown="otpKey(event,3)" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" id="otp4" oninput="otpInput(4)" onkeydown="otpKey(event,4)" type="text" inputmode="numeric">
+          <input class="otp-box" maxlength="1" id="otp5" oninput="otpInput(5)" onkeydown="otpKey(event,5)" type="text" inputmode="numeric">
+        </div>
+        <div class="fp-resend">
+          Didn't receive it? <a onclick="resendOTP()" id="resendLink">Resend OTP</a>
+          <span class="fp-timer hidden" id="resendTimer"></span>
+        </div>
+        <button class="fp-btn" onclick="verifyOTP()" style="margin-top:20px;">✅ Verify OTP</button>
+        <button class="fp-btn-ghost" onclick="goFpStep(1)">← Change Email</button>
+      </div>
+
+      <!-- STEP 3 — New Password -->
+      <div class="fp-step-panel" id="fpStep3">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="font-size:2.8rem;margin-bottom:12px;">🔑</div>
+          <h2 style="font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:8px;">Set New Password</h2>
+          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;">Create a strong new password for your account. You'll be logged in automatically after resetting.</p>
+        </div>
+        <div class="afb-group">
+          <label class="afb-label">New Password</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">🔑</span>
+            <input class="afb-input" id="fpNewPass" type="password" placeholder="Min 6 characters" oninput="checkPwStrength(this.value)">
+            <button class="afb-pw-toggle" onclick="togglePw('fpNewPass',this)" type="button">👁️</button>
+          </div>
+          <div class="pw-strength" style="margin-top:8px;">
+            <div class="pw-bar" id="pb1"></div><div class="pw-bar" id="pb2"></div>
+            <div class="pw-bar" id="pb3"></div><div class="pw-bar" id="pb4"></div>
+          </div>
+          <div class="pw-label" id="pwLabel"></div>
+        </div>
+        <div class="afb-group">
+          <label class="afb-label">Confirm New Password</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">🔒</span>
+            <input class="afb-input" id="fpConfPass" type="password" placeholder="Repeat new password">
+            <button class="afb-pw-toggle" onclick="togglePw('fpConfPass',this)" type="button">👁️</button>
+          </div>
+        </div>
+        <button class="fp-btn" onclick="resetPassword()">🔐 Reset Password</button>
+        <button class="fp-btn-ghost" onclick="goFpStep(2)">← Back</button>
+      </div>
+
+      <!-- STEP 4 — Success -->
+      <div class="fp-step-panel" id="fpStep4">
+        <div class="fp-success">
+          <div class="fp-success-icon">🎉</div>
+          <h3>Password Reset!</h3>
+          <p>Your password has been successfully updated. You can now log in with your new password.</p>
+          <button class="fp-btn" onclick="showPage('login')" style="margin-top:28px;">🔐 Go to Login</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- COURSES PAGE — BCA All Subjects + Teachers                   -->
+<!-- ================================================================ -->
+<div id="page-courses" class="page">
+
+  <!-- HERO -->
+  <div class="crs-hero">
+    <div class="crs-hero-bg"></div>
+    <div class="crs-hero-inner reveal">
+      <div class="crs-hero-tag">🎓 BCA Program</div>
+      <h1>Bachelor of Computer<br><span>Applications</span></h1>
+      <p>3-Year Degree Program (6 Semesters) — All subjects, teachers, credits aur course details ek jagah</p>
+      <div class="crs-hero-pills">
+        <div class="crs-hero-pill">📅 3 Years / 6 Semesters</div>
+        <div class="crs-hero-pill">📚 36+ Subjects</div>
+        <div class="crs-hero-pill">🏅 180 Credits</div>
+        <div class="crs-hero-pill">👨‍💻 Industry-Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMESTER TABS -->
+  <div class="crs-tabs-wrap">
+    <div class="crs-tabs" id="crsTabs">
+      <button class="crs-tab active" onclick="showSem(1,this)">Sem 1</button>
+      <button class="crs-tab" onclick="showSem(2,this)">Sem 2</button>
+      <button class="crs-tab" onclick="showSem(3,this)">Sem 3</button>
+      <button class="crs-tab" onclick="showSem(4,this)">Sem 4</button>
+      <button class="crs-tab" onclick="showSem(5,this)">Sem 5</button>
+      <button class="crs-tab" onclick="showSem(6,this)">Sem 6</button>
+    </div>
+  </div>
+
+  <!-- SEMESTER PANELS -->
+  <div class="crs-body">
+
+    <!-- ── SEMESTER 1 ── -->
+    <div class="crs-sem active" id="sem1">
+      <div class="sem-header reveal">
+        <div class="sem-title">📘 Semester 1 — Foundation of Computing</div>
+        <div class="sem-meta">6 Subjects · 30 Credits · Theory + Practical</div>
+      </div>
+      <div class="crs-grid">
+
+        <div class="crs-card reveal delay-1">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">
+            <div class="crs-code">BCA-101</div>
+            <div class="crs-icon">💻</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Introduction to Computer Science</div>
+            <div class="crs-desc">Computer history, types, components, number systems (Binary, Octal, Hex), CPU architecture, memory hierarchy, I/O devices, and basic operating system concepts.</div>
+            <div class="crs-info-row">
+              <span class="crs-credit">📊 5 Credits</span>
+              <span class="crs-type theory">Theory</span>
+            </div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">RS</div>
+              <div>
+                <div class="crs-teacher-name">Prof. Rajesh Sharma</div>
+                <div class="crs-teacher-qual">M.Tech (CS), 12 yrs experience</div>
+                <div class="crs-teacher-email">📧 r.sharma@bca.edu.in</div>
+              </div>
+            </div>
+            <div class="crs-topics">
+              <span class="crs-topic">Number Systems</span><span class="crs-topic">CPU Architecture</span><span class="crs-topic">Memory</span><span class="crs-topic">I/O Devices</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-2">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#065f46,#059669);">
+            <div class="crs-code">BCA-102</div>
+            <div class="crs-icon">➕</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Mathematics — I (Algebra & Calculus)</div>
+            <div class="crs-desc">Set theory, relations & functions, matrices, determinants, limits, differentiation, integration, and applications of calculus in computing.</div>
+            <div class="crs-info-row">
+              <span class="crs-credit">📊 5 Credits</span>
+              <span class="crs-type theory">Theory</span>
+            </div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#065f46,#059669);">PV</div>
+              <div>
+                <div class="crs-teacher-name">Prof. Priya Verma</div>
+                <div class="crs-teacher-qual">M.Sc (Mathematics), 9 yrs experience</div>
+                <div class="crs-teacher-email">📧 p.verma@bca.edu.in</div>
+              </div>
+            </div>
+            <div class="crs-topics">
+              <span class="crs-topic">Set Theory</span><span class="crs-topic">Matrices</span><span class="crs-topic">Calculus</span><span class="crs-topic">Functions</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-3">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">
+            <div class="crs-code">BCA-103</div>
+            <div class="crs-icon">📝</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Programming in C</div>
+            <div class="crs-desc">C language fundamentals — data types, operators, control flow, functions, arrays, pointers, strings, structures, file I/O, and basic algorithm design.</div>
+            <div class="crs-info-row">
+              <span class="crs-credit">📊 6 Credits</span>
+              <span class="crs-type practical">Theory + Lab</span>
+            </div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">AK</div>
+              <div>
+                <div class="crs-teacher-name">Prof. Amit Kumar</div>
+                <div class="crs-teacher-qual">MCA, 15 yrs experience</div>
+                <div class="crs-teacher-email">📧 a.kumar@bca.edu.in</div>
+              </div>
+            </div>
+            <div class="crs-topics">
+              <span class="crs-topic">Pointers</span><span class="crs-topic">Arrays</span><span class="crs-topic">Structures</span><span class="crs-topic">File I/O</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-4">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+            <div class="crs-code">BCA-104</div>
+            <div class="crs-icon">🌐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Communication Skills in English</div>
+            <div class="crs-desc">Technical writing, email etiquette, group discussions, presentations, comprehension, grammar for professional contexts, and report writing skills.</div>
+            <div class="crs-info-row">
+              <span class="crs-credit">📊 4 Credits</span>
+              <span class="crs-type theory">Theory</span>
+            </div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">SG</div>
+              <div>
+                <div class="crs-teacher-name">Prof. Sunita Gupta</div>
+                <div class="crs-teacher-qual">MA (English), B.Ed, 10 yrs experience</div>
+                <div class="crs-teacher-email">📧 s.gupta@bca.edu.in</div>
+              </div>
+            </div>
+            <div class="crs-topics">
+              <span class="crs-topic">Technical Writing</span><span class="crs-topic">Presentations</span><span class="crs-topic">Grammar</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-5">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#4c0519,#be185d);">
+            <div class="crs-code">BCA-105</div>
+            <div class="crs-icon">📊</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Digital Electronics & Logic Design</div>
+            <div class="crs-desc">Boolean algebra, logic gates, combinational circuits (adders, multiplexers), sequential circuits (flip-flops, counters), minimization using K-map.</div>
+            <div class="crs-info-row">
+              <span class="crs-credit">📊 5 Credits</span>
+              <span class="crs-type theory">Theory</span>
+            </div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#4c0519,#be185d);">NK</div>
+              <div>
+                <div class="crs-teacher-name">Prof. Neeraj Kumar</div>
+                <div class="crs-teacher-qual">M.Tech (ECE), 8 yrs experience</div>
+                <div class="crs-teacher-email">📧 n.kumar@bca.edu.in</div>
+              </div>
+            </div>
+            <div class="crs-topics">
+              <span class="crs-topic">Boolean Algebra</span><span class="crs-topic">K-Map</span><span class="crs-topic">Flip-Flops</span><span class="crs-topic">Gates</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-6">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">
+            <div class="crs-code">BCA-106L</div>
+            <div class="crs-icon">🖥️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">C Programming Lab</div>
+            <div class="crs-desc">Hands-on practice of C programs — pattern printing, sorting algorithms, linked list operations, file handling programs, and mini-projects in C.</div>
+            <div class="crs-info-row">
+              <span class="crs-credit">📊 5 Credits</span>
+              <span class="crs-type lab">Lab Only</span>
+            </div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">AK</div>
+              <div>
+                <div class="crs-teacher-name">Prof. Amit Kumar</div>
+                <div class="crs-teacher-qual">MCA, 15 yrs experience</div>
+                <div class="crs-teacher-email">📧 a.kumar@bca.edu.in</div>
+              </div>
+            </div>
+            <div class="crs-topics">
+              <span class="crs-topic">Sorting</span><span class="crs-topic">Linked Lists</span><span class="crs-topic">File Programs</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /sem1 -->
+
+    <!-- ── SEMESTER 2 ── -->
+    <div class="crs-sem" id="sem2">
+      <div class="sem-header reveal">
+        <div class="sem-title">📗 Semester 2 — Data & Systems</div>
+        <div class="sem-meta">6 Subjects · 30 Credits · Theory + Practical</div>
+      </div>
+      <div class="crs-grid">
+
+        <div class="crs-card reveal delay-1">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">
+            <div class="crs-code">BCA-201</div><div class="crs-icon">🗂️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Data Structures using C</div>
+            <div class="crs-desc">Arrays, stacks, queues, linked lists (single/double/circular), trees (BST, AVL), graphs, and sorting/searching algorithms with time complexity analysis.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">MS</div>
+              <div><div class="crs-teacher-name">Prof. Meena Singh</div><div class="crs-teacher-qual">MCA, PhD (pursuing), 11 yrs</div><div class="crs-teacher-email">📧 m.singh@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">BST</span><span class="crs-topic">Graphs</span><span class="crs-topic">Sorting</span><span class="crs-topic">Hashing</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-2">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#065f46,#059669);">
+            <div class="crs-code">BCA-202</div><div class="crs-icon">🗄️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Database Management Systems</div>
+            <div class="crs-desc">Relational model, ER diagrams, SQL (DDL/DML/DCL), normalization (1NF-BCNF), transactions, ACID properties, concurrency control, and indexing.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#065f46,#059669);">RP</div>
+              <div><div class="crs-teacher-name">Prof. Rohit Pandey</div><div class="crs-teacher-qual">M.Tech (IT), 13 yrs experience</div><div class="crs-teacher-email">📧 r.pandey@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">SQL</span><span class="crs-topic">Normalization</span><span class="crs-topic">Transactions</span><span class="crs-topic">ER Model</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-3">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">
+            <div class="crs-code">BCA-203</div><div class="crs-icon">➕</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Mathematics — II (Discrete Math)</div>
+            <div class="crs-desc">Propositional logic, predicate calculus, graph theory, trees, combinatorics, recurrence relations, and Boolean functions for CS applications.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">PV</div>
+              <div><div class="crs-teacher-name">Prof. Priya Verma</div><div class="crs-teacher-qual">M.Sc (Mathematics), 9 yrs</div><div class="crs-teacher-email">📧 p.verma@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Logic</span><span class="crs-topic">Graph Theory</span><span class="crs-topic">Combinatorics</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-4">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+            <div class="crs-code">BCA-204</div><div class="crs-icon">🖥️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Operating Systems</div>
+            <div class="crs-desc">Process management, CPU scheduling (FCFS, SJF, Round Robin), deadlocks, memory management, virtual memory, paging, segmentation, and file systems.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">DT</div>
+              <div><div class="crs-teacher-name">Prof. Deepak Tripathi</div><div class="crs-teacher-qual">MCA, M.Phil (CS), 14 yrs</div><div class="crs-teacher-email">📧 d.tripathi@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Scheduling</span><span class="crs-topic">Deadlocks</span><span class="crs-topic">Paging</span><span class="crs-topic">File Systems</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-5">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#4c0519,#be185d);">
+            <div class="crs-code">BCA-205</div><div class="crs-icon">🌐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Web Technology — I (HTML & CSS)</div>
+            <div class="crs-desc">HTML5 semantic tags, CSS3 (Flexbox, Grid, animations), responsive design, Bootstrap framework, forms, and introduction to web standards and accessibility.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#4c0519,#be185d);">SC</div>
+              <div><div class="crs-teacher-name">Prof. Sneha Chaudhary</div><div class="crs-teacher-qual">MCA, Web Dev Certified, 7 yrs</div><div class="crs-teacher-email">📧 s.chaudhary@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">HTML5</span><span class="crs-topic">CSS3</span><span class="crs-topic">Bootstrap</span><span class="crs-topic">Responsive</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-6">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">
+            <div class="crs-code">BCA-206L</div><div class="crs-icon">🗄️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">DBMS Lab (MySQL)</div>
+            <div class="crs-desc">Practical SQL exercises — DDL/DML queries, joins, subqueries, stored procedures, triggers, views, and mini-project in MySQL database design.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type lab">Lab Only</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">RP</div>
+              <div><div class="crs-teacher-name">Prof. Rohit Pandey</div><div class="crs-teacher-qual">M.Tech (IT), 13 yrs</div><div class="crs-teacher-email">📧 r.pandey@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">MySQL</span><span class="crs-topic">Triggers</span><span class="crs-topic">Views</span><span class="crs-topic">Procedures</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /sem2 -->
+
+    <!-- ── SEMESTER 3 ── -->
+    <div class="crs-sem" id="sem3">
+      <div class="sem-header reveal">
+        <div class="sem-title">📙 Semester 3 — OOP & Networks</div>
+        <div class="sem-meta">6 Subjects · 30 Credits · Theory + Practical</div>
+      </div>
+      <div class="crs-grid">
+
+        <div class="crs-card reveal delay-1">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">
+            <div class="crs-code">BCA-301</div><div class="crs-icon">☕</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Object-Oriented Programming (Java)</div>
+            <div class="crs-desc">OOP concepts — classes, objects, inheritance, polymorphism, abstraction, encapsulation, interfaces, exception handling, generics, and collections in Java.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">VY</div>
+              <div><div class="crs-teacher-name">Prof. Vijay Yadav</div><div class="crs-teacher-qual">MCA, Oracle Certified, 10 yrs</div><div class="crs-teacher-email">📧 v.yadav@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Inheritance</span><span class="crs-topic">Polymorphism</span><span class="crs-topic">Exception</span><span class="crs-topic">Collections</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-2">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#065f46,#059669);">
+            <div class="crs-code">BCA-302</div><div class="crs-icon">🌐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Computer Networks</div>
+            <div class="crs-desc">OSI & TCP/IP model, data link layer, routing algorithms, IP addressing, subnetting, protocols (HTTP, FTP, DNS, SMTP), network security basics.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#065f46,#059669);">KS</div>
+              <div><div class="crs-teacher-name">Prof. Kamal Srivastava</div><div class="crs-teacher-qual">M.Tech (Networks), CCNA, 12 yrs</div><div class="crs-teacher-email">📧 k.srivastava@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">TCP/IP</span><span class="crs-topic">Routing</span><span class="crs-topic">Subnetting</span><span class="crs-topic">Protocols</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-3">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">
+            <div class="crs-code">BCA-303</div><div class="crs-icon">📐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Software Engineering</div>
+            <div class="crs-desc">SDLC models (Waterfall, Agile, Scrum), requirement analysis, SRS, system design (DFD, UML), testing (unit/integration/system), project management, and CASE tools.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">AT</div>
+              <div><div class="crs-teacher-name">Prof. Anjali Tiwari</div><div class="crs-teacher-qual">MCA, PMP Certified, 9 yrs</div><div class="crs-teacher-email">📧 a.tiwari@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Agile</span><span class="crs-topic">UML</span><span class="crs-topic">SRS</span><span class="crs-topic">Testing</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-4">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+            <div class="crs-code">BCA-304</div><div class="crs-icon">🔢</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Statistics & Numerical Methods</div>
+            <div class="crs-desc">Probability theory, distributions (Binomial, Normal, Poisson), hypothesis testing, numerical solutions (Newton-Raphson, Gaussian elimination, interpolation).</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">PV</div>
+              <div><div class="crs-teacher-name">Prof. Priya Verma</div><div class="crs-teacher-qual">M.Sc Mathematics, 9 yrs</div><div class="crs-teacher-email">📧 p.verma@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Probability</span><span class="crs-topic">Distributions</span><span class="crs-topic">Interpolation</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-5">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#4c0519,#be185d);">
+            <div class="crs-code">BCA-305</div><div class="crs-icon">🌐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Web Technology — II (JavaScript)</div>
+            <div class="crs-desc">JavaScript fundamentals, DOM manipulation, events, AJAX, Fetch API, ES6+ features (arrow functions, promises, async/await), JSON, and introduction to Node.js.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#4c0519,#be185d);">SC</div>
+              <div><div class="crs-teacher-name">Prof. Sneha Chaudhary</div><div class="crs-teacher-qual">MCA, Web Dev Certified, 7 yrs</div><div class="crs-teacher-email">📧 s.chaudhary@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">DOM</span><span class="crs-topic">AJAX</span><span class="crs-topic">ES6+</span><span class="crs-topic">Node.js</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-6">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">
+            <div class="crs-code">BCA-306L</div><div class="crs-icon">☕</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Java Programming Lab</div>
+            <div class="crs-desc">Java practical programs — GUI using Swing/AWT, file handling, multithreading, JDBC database connectivity, and a mini project using OOP concepts.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type lab">Lab Only</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">VY</div>
+              <div><div class="crs-teacher-name">Prof. Vijay Yadav</div><div class="crs-teacher-qual">MCA, Oracle Certified, 10 yrs</div><div class="crs-teacher-email">📧 v.yadav@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Swing</span><span class="crs-topic">JDBC</span><span class="crs-topic">Threads</span><span class="crs-topic">Mini Project</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /sem3 -->
+
+    <!-- ── SEMESTER 4 ── -->
+    <div class="crs-sem" id="sem4">
+      <div class="sem-header reveal">
+        <div class="sem-title">📕 Semester 4 — Advanced Programming</div>
+        <div class="sem-meta">6 Subjects · 30 Credits · Theory + Practical</div>
+      </div>
+      <div class="crs-grid">
+
+        <div class="crs-card reveal delay-1">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">
+            <div class="crs-code">BCA-401</div><div class="crs-icon">🐍</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Python Programming</div>
+            <div class="crs-desc">Python syntax, data structures (list/dict/tuple/set), file handling, OOP in Python, modules, packages, exception handling, and intro to libraries (NumPy, Pandas).</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">RJ</div>
+              <div><div class="crs-teacher-name">Prof. Ravi Joshi</div><div class="crs-teacher-qual">M.Tech AI/ML, 8 yrs experience</div><div class="crs-teacher-email">📧 r.joshi@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">OOP Python</span><span class="crs-topic">NumPy</span><span class="crs-topic">Pandas</span><span class="crs-topic">Modules</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-2">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#065f46,#059669);">
+            <div class="crs-code">BCA-402</div><div class="crs-icon">🔐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Information Security & Cryptography</div>
+            <div class="crs-desc">Symmetric & asymmetric encryption, DES, AES, RSA, digital signatures, PKI, SSL/TLS, firewalls, intrusion detection, ethical hacking basics, and cyber laws.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#065f46,#059669);">BM</div>
+              <div><div class="crs-teacher-name">Prof. Bharat Mishra</div><div class="crs-teacher-qual">M.Tech (Cyber Security), CEH, 11 yrs</div><div class="crs-teacher-email">📧 b.mishra@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Encryption</span><span class="crs-topic">RSA</span><span class="crs-topic">Firewall</span><span class="crs-topic">Cyber Laws</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-3">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">
+            <div class="crs-code">BCA-403</div><div class="crs-icon">⚙️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Design & Analysis of Algorithms</div>
+            <div class="crs-desc">Asymptotic notations, divide & conquer, greedy algorithms, dynamic programming, backtracking, branch & bound, graph algorithms (Dijkstra, Kruskal, Prim).</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">MS</div>
+              <div><div class="crs-teacher-name">Prof. Meena Singh</div><div class="crs-teacher-qual">MCA, PhD pursuing, 11 yrs</div><div class="crs-teacher-email">📧 m.singh@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">DP</span><span class="crs-topic">Greedy</span><span class="crs-topic">Dijkstra</span><span class="crs-topic">Backtracking</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-4">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+            <div class="crs-code">BCA-404</div><div class="crs-icon">🖥️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Computer Graphics & Multimedia</div>
+            <div class="crs-desc">2D/3D graphics, scan conversion, clipping, transformations, Bezier curves, OpenGL basics, image formats, video codecs, audio formats, and multimedia applications.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">NK</div>
+              <div><div class="crs-teacher-name">Prof. Neeraj Kumar</div><div class="crs-teacher-qual">M.Tech (ECE), 8 yrs</div><div class="crs-teacher-email">📧 n.kumar@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">2D/3D</span><span class="crs-topic">Clipping</span><span class="crs-topic">OpenGL</span><span class="crs-topic">Multimedia</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-5">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#4c0519,#be185d);">
+            <div class="crs-code">BCA-405</div><div class="crs-icon">🏢</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Accounting & Financial Management</div>
+            <div class="crs-desc">Basics of accounting, double-entry system, financial statements, tally ERP, GST fundamentals, budgeting, ratio analysis, and IT applications in finance.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#4c0519,#be185d);">LG</div>
+              <div><div class="crs-teacher-name">Prof. Lata Gupta</div><div class="crs-teacher-qual">MBA (Finance), CA Inter, 10 yrs</div><div class="crs-teacher-email">📧 l.gupta@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Tally ERP</span><span class="crs-topic">GST</span><span class="crs-topic">Ratio Analysis</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-6">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">
+            <div class="crs-code">BCA-406L</div><div class="crs-icon">🐍</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Python & Data Analysis Lab</div>
+            <div class="crs-desc">Practical programs using Python — data manipulation with Pandas, data visualization with Matplotlib/Seaborn, basic ML with Scikit-learn, and mini project.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type lab">Lab Only</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">RJ</div>
+              <div><div class="crs-teacher-name">Prof. Ravi Joshi</div><div class="crs-teacher-qual">M.Tech AI/ML, 8 yrs</div><div class="crs-teacher-email">📧 r.joshi@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Matplotlib</span><span class="crs-topic">Pandas</span><span class="crs-topic">Scikit-learn</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /sem4 -->
+
+    <!-- ── SEMESTER 5 ── -->
+    <div class="crs-sem" id="sem5">
+      <div class="sem-header reveal">
+        <div class="sem-title">📓 Semester 5 — Specialization & AI</div>
+        <div class="sem-meta">6 Subjects · 30 Credits · Theory + Practical</div>
+      </div>
+      <div class="crs-grid">
+
+        <div class="crs-card reveal delay-1">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">
+            <div class="crs-code">BCA-501</div><div class="crs-icon">🤖</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Artificial Intelligence</div>
+            <div class="crs-desc">Search algorithms (BFS, DFS, A*), knowledge representation, expert systems, natural language processing basics, machine learning overview, neural networks, and AI ethics.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">RJ</div>
+              <div><div class="crs-teacher-name">Prof. Ravi Joshi</div><div class="crs-teacher-qual">M.Tech AI/ML, 8 yrs</div><div class="crs-teacher-email">📧 r.joshi@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Search Algos</span><span class="crs-topic">NLP</span><span class="crs-topic">Neural Nets</span><span class="crs-topic">ML Overview</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-2">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#065f46,#059669);">
+            <div class="crs-code">BCA-502</div><div class="crs-icon">📱</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Mobile Application Development</div>
+            <div class="crs-desc">Android fundamentals (Activities, Intents, Fragments), UI design with XML layouts, SQLite database, REST API integration, Firebase, and publishing on Play Store.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#065f46,#059669);">VY</div>
+              <div><div class="crs-teacher-name">Prof. Vijay Yadav</div><div class="crs-teacher-qual">MCA, Android Dev Certified, 10 yrs</div><div class="crs-teacher-email">📧 v.yadav@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Android</span><span class="crs-topic">SQLite</span><span class="crs-topic">Firebase</span><span class="crs-topic">REST API</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-3">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">
+            <div class="crs-code">BCA-503</div><div class="crs-icon">☁️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Cloud Computing</div>
+            <div class="crs-desc">Cloud models (IaaS/PaaS/SaaS), AWS & Azure basics, virtualization, Docker containers, deployment strategies, serverless architecture, and cloud security.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">KS</div>
+              <div><div class="crs-teacher-name">Prof. Kamal Srivastava</div><div class="crs-teacher-qual">M.Tech, AWS Certified, 12 yrs</div><div class="crs-teacher-email">📧 k.srivastava@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">AWS</span><span class="crs-topic">Docker</span><span class="crs-topic">Serverless</span><span class="crs-topic">Virtualization</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-4">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+            <div class="crs-code">BCA-504</div><div class="crs-icon">🏗️</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Advanced DBMS (NoSQL & Big Data)</div>
+            <div class="crs-desc">NoSQL databases (MongoDB, Cassandra), Big Data concepts, Hadoop ecosystem, MapReduce, Spark basics, data warehousing, ETL processes, and OLAP vs OLTP.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">RP</div>
+              <div><div class="crs-teacher-name">Prof. Rohit Pandey</div><div class="crs-teacher-qual">M.Tech (IT), MongoDB Certified, 13 yrs</div><div class="crs-teacher-email">📧 r.pandey@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">MongoDB</span><span class="crs-topic">Hadoop</span><span class="crs-topic">Spark</span><span class="crs-topic">ETL</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-5">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#4c0519,#be185d);">
+            <div class="crs-code">BCA-505</div><div class="crs-icon">💼</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">E-Commerce & Digital Marketing</div>
+            <div class="crs-desc">E-commerce models (B2B/B2C/C2C), payment gateways, SEO, social media marketing, Google Ads, email marketing, analytics (Google Analytics), and legal aspects.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#4c0519,#be185d);">LG</div>
+              <div><div class="crs-teacher-name">Prof. Lata Gupta</div><div class="crs-teacher-qual">MBA, Digital Marketing Expert, 10 yrs</div><div class="crs-teacher-email">📧 l.gupta@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">SEO</span><span class="crs-topic">Google Ads</span><span class="crs-topic">Analytics</span><span class="crs-topic">Payment</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-6">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">
+            <div class="crs-code">BCA-506L</div><div class="crs-icon">🤖</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">AI & ML Lab</div>
+            <div class="crs-desc">Practical AI/ML programs — regression, classification, clustering using Scikit-learn, neural network with TensorFlow/Keras basics, image recognition mini-project.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type lab">Lab Only</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">RJ</div>
+              <div><div class="crs-teacher-name">Prof. Ravi Joshi</div><div class="crs-teacher-qual">M.Tech AI/ML, 8 yrs</div><div class="crs-teacher-email">📧 r.joshi@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">TensorFlow</span><span class="crs-topic">Keras</span><span class="crs-topic">Regression</span><span class="crs-topic">Classification</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /sem5 -->
+
+    <!-- ── SEMESTER 6 ── -->
+    <div class="crs-sem" id="sem6">
+      <div class="sem-header reveal">
+        <div class="sem-title">🎓 Semester 6 — Final Year & Project</div>
+        <div class="sem-meta">4 Subjects + Project + Internship · 30 Credits</div>
+      </div>
+      <div class="crs-grid">
+
+        <div class="crs-card reveal delay-1">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">
+            <div class="crs-code">BCA-601</div><div class="crs-icon">🌐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Full Stack Web Development</div>
+            <div class="crs-desc">React.js frontend, Node.js + Express backend, REST API design, MongoDB/MySQL integration, authentication (JWT), deployment (Heroku/Vercel/AWS), and DevOps basics.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 6 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">SC</div>
+              <div><div class="crs-teacher-name">Prof. Sneha Chaudhary</div><div class="crs-teacher-qual">MCA, Full Stack Dev, 7 yrs</div><div class="crs-teacher-email">📧 s.chaudhary@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">React.js</span><span class="crs-topic">Node.js</span><span class="crs-topic">JWT</span><span class="crs-topic">Deployment</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-2">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#065f46,#059669);">
+            <div class="crs-code">BCA-602</div><div class="crs-icon">📊</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Data Science & Visualization</div>
+            <div class="crs-desc">Complete data science pipeline — data collection, cleaning, EDA, feature engineering, model building, evaluation, and visualization using Power BI / Tableau / Python.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 5 Credits</span><span class="crs-type practical">Theory + Lab</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#065f46,#059669);">RJ</div>
+              <div><div class="crs-teacher-name">Prof. Ravi Joshi</div><div class="crs-teacher-qual">M.Tech AI/ML, 8 yrs</div><div class="crs-teacher-email">📧 r.joshi@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">EDA</span><span class="crs-topic">Power BI</span><span class="crs-topic">Tableau</span><span class="crs-topic">Feature Engg</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-3">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">
+            <div class="crs-code">BCA-603</div><div class="crs-icon">📐</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Compiler Design</div>
+            <div class="crs-desc">Phases of compiler, lexical analysis, parsing (top-down & bottom-up), syntax-directed translation, semantic analysis, code optimization, and code generation.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#0c4a6e,#06b6d4);">DT</div>
+              <div><div class="crs-teacher-name">Prof. Deepak Tripathi</div><div class="crs-teacher-qual">MCA, M.Phil (CS), 14 yrs</div><div class="crs-teacher-email">📧 d.tripathi@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Lexical</span><span class="crs-topic">Parsing</span><span class="crs-topic">Semantic</span><span class="crs-topic">Code Gen</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-4">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+            <div class="crs-code">BCA-604</div><div class="crs-icon">💼</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Entrepreneurship & IT Management</div>
+            <div class="crs-desc">Startup ecosystem, business plan writing, IT project management, Agile teams, leadership skills, IP rights, funding & venture capital, and digital transformation.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 3 Credits</span><span class="crs-type theory">Theory</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">AT</div>
+              <div><div class="crs-teacher-name">Prof. Anjali Tiwari</div><div class="crs-teacher-qual">MCA, PMP, MBA, 9 yrs</div><div class="crs-teacher-email">📧 a.tiwari@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Startup</span><span class="crs-topic">Agile Teams</span><span class="crs-topic">IP Rights</span><span class="crs-topic">Leadership</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-5" style="border:2.5px solid #7c3aed;">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#1e0442,#5b21b6,#06b6d4);">
+            <div class="crs-code">BCA-605P</div><div class="crs-icon">🚀</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject" style="color:#5b21b6;">Final Year Project ⭐</div>
+            <div class="crs-desc">Individual or group project applying all 3 years of learning. Includes project report, documentation, presentation, viva voce. Topics: Web App, AI/ML, Mobile App, Desktop App.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 8 Credits</span><span class="crs-type" style="background:#ede9fe;color:#5b21b6;">Major Project</span></div>
+            <div class="crs-teacher-box" style="background:#f5f3ff;">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#3b0764,#7c3aed);">RS</div>
+              <div><div class="crs-teacher-name">Prof. Rajesh Sharma</div><div class="crs-teacher-qual">Project Coordinator & Guide</div><div class="crs-teacher-email">📧 r.sharma@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic" style="background:#ede9fe;color:#5b21b6;">Web App</span><span class="crs-topic" style="background:#ede9fe;color:#5b21b6;">AI/ML</span><span class="crs-topic" style="background:#ede9fe;color:#5b21b6;">Mobile</span><span class="crs-topic" style="background:#ede9fe;color:#5b21b6;">Report</span></div>
+          </div>
+        </div>
+
+        <div class="crs-card reveal delay-6">
+          <div class="crs-card-top" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">
+            <div class="crs-code">BCA-606I</div><div class="crs-icon">🏢</div>
+          </div>
+          <div class="crs-card-body">
+            <div class="crs-subject">Industrial Training / Internship</div>
+            <div class="crs-desc">6–8 week internship with a company or organization. Students work on real projects, submit a detailed internship report, and give a presentation to the department.</div>
+            <div class="crs-info-row"><span class="crs-credit">📊 4 Credits</span><span class="crs-type" style="background:#d1fae5;color:#059669;">Internship</span></div>
+            <div class="crs-teacher-box">
+              <div class="crs-teacher-avatar" style="background:linear-gradient(135deg,#1e1b4b,#4338ca);">AT</div>
+              <div><div class="crs-teacher-name">Prof. Anjali Tiwari</div><div class="crs-teacher-qual">Internship Coordinator</div><div class="crs-teacher-email">📧 a.tiwari@bca.edu.in</div></div>
+            </div>
+            <div class="crs-topics"><span class="crs-topic">Real Projects</span><span class="crs-topic">Report</span><span class="crs-topic">Viva</span><span class="crs-topic">Industry</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /sem6 -->
+
+  </div><!-- /crs-body -->
+
+  <!-- FACULTY DIRECTORY -->
+  <div style="background:var(--bg);padding:64px 2rem;">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:40px;" class="reveal">
+        <div class="hp-section-tag">👨‍🏫 Faculty</div>
+        <h2 class="hp-section-h2">BCA Department Faculty</h2>
+        <p class="hp-section-p">Experienced, qualified faculty members dedicated to shaping the next generation of computer professionals.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;" id="facultyGrid">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-courses -->
+
+<!-- ================================================================ -->
+<!-- DARK MODE + FORGOT PASSWORD JAVASCRIPT -->
+<!-- ================================================================ -->
+
+<!-- ===== AI GENERATOR + VOICE OVERLAY CSS ===== -->
+
+<script src="js/app.js"></script>
+</body>
+</html>

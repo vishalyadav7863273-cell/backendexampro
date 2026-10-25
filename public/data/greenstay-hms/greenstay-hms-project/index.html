@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GreenStay — Hotel Management System</title>
+<style>
+  :root{
+    --bg:#F6F4EE;
+    --surface:#FFFFFF;
+    --ink:#22291F;
+    --ink-soft:#5A6153;
+    --pine:#24402F;
+    --pine-dark:#152A1D;
+    --moss:#5B7A5E;
+    --clay:#B9713A;
+    --water:#3D6E88;
+    --sand:#E4DCC6;
+    --sand-dark:#CFC4A0;
+    --danger:#8C4A3B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+    color:var(--pine);
+    margin:0 0 6px 0;
+    font-weight:600;
+  }
+  a{color:inherit;}
+
+  /* ---------- Header / Nav ---------- */
+  header.app{
+    background:var(--pine-dark);
+    color:#EFEBDD;
+    padding:0 24px;
+  }
+  .headbar{
+    max-width:1120px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 0;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .leaf{
+    width:30px; height:30px; flex-shrink:0;
+  }
+  .brand .name{font-family:Georgia,serif; font-size:19px; color:#fff; letter-spacing:.2px;}
+  .brand .sub{font-size:11.5px; color:#B9C8B9; margin-top:1px;}
+  nav.tabs{
+    display:flex;
+    gap:2px;
+    max-width:1120px;
+    margin:0 auto;
+    overflow-x:auto;
+    border-top:1px solid #33493B;
+  }
+  nav.tabs button{
+    background:none;
+    border:none;
+    padding:12px 14px;
+    font-size:13.5px;
+    color:#C9D3C4;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+    font-family:inherit;
+  }
+  nav.tabs button.active{
+    color:#fff;
+    border-bottom:2px solid var(--clay);
+    font-weight:600;
+  }
+  nav.tabs button:hover{color:#fff;}
+
+  main{
+    max-width:1120px;
+    margin:0 auto;
+    padding:28px 24px 70px 24px;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* ---------- Home / Hero ---------- */
+  .hero{
+    background:var(--pine);
+    color:#EFEBDD;
+    border-radius:6px;
+    padding:44px 36px;
+    margin-bottom:26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero svg.leafbg{
+    position:absolute; right:-40px; top:-30px; opacity:.14; width:280px; height:280px;
+  }
+  .hero h2{
+    color:#fff;
+    font-size:30px;
+    max-width:560px;
+    position:relative;
+  }
+  .hero p{
+    color:#CFDBCB;
+    max-width:520px;
+    font-size:14.5px;
+    position:relative;
+    margin-bottom:22px;
+  }
+  .hero .cta-row{display:flex; gap:12px; flex-wrap:wrap; position:relative;}
+  .hero .btn{margin-top:0;}
+  .hero .btn.ghost{
+    background:none;
+    border:1px solid #6D8A6F;
+    color:#EFEBDD;
+  }
+  .hero .btn.ghost:hover{background:#33493B;}
+
+  .stats-row{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    margin-bottom:26px;
+  }
+  @media (max-width:900px){.stats-row{grid-template-columns:repeat(3,1fr);}}
+  @media (max-width:560px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+  .stat{
+    background:var(--surface);
+    border:1px solid var(--sand-dark);
+    border-left:3px solid var(--moss);
+    padding:14px 14px;
+    border-radius:2px;
+  }
+  .stat.clay{border-left-color:var(--clay);}
+  .stat.water{border-left-color:var(--water);}
+  .stat .num{font-size:22px; font-family:Georgia,serif; color:var(--pine); line-height:1;}
+  .stat .lbl{font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
+
+  .module-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  @media (max-width:800px){.module-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.module-grid{grid-template-columns:1fr;}}
+  .module-card{
+    background:var(--surface);
+    border:1px solid var(--sand-dark);
+    border-radius:4px;
+    padding:18px 18px;
+    cursor:pointer;
+    text-align:left;
+  }
+  .module-card:hover{border-color:var(--moss);}
+  .module-card .ico{font-size:22px;}
+  .module-card h3{font-size:15.5px; margin:8px 0 4px 0;}
+  .module-card p{font-size:12.5px; color:var(--ink-soft); margin:0;}
+
+  /* ---------- Shared card / form styles ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--sand-dark);
+    border-radius:4px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .card h3{font-size:17px; margin-bottom:4px;}
+  .card .hint{color:var(--ink-soft); font-size:13px; margin-bottom:16px;}
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+    margin-top:14px;
+  }
+  label:first-of-type{margin-top:0;}
+  input[type=text],input[type=number],input[type=date],input[type=tel],select{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--sand-dark);
+    border-radius:3px;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:14px;
+    font-family:inherit;
+  }
+  input:focus,select:focus,button:focus{outline:2px solid var(--water); outline-offset:1px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:0 16px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:0 16px;}
+  @media (max-width:640px){.row2,.row3{grid-template-columns:1fr;}}
+
+  .checkrow{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid var(--sand);
+  }
+  .checkrow:last-child{border-bottom:none;}
+  .checkrow input{margin-top:3px;}
+  .checkrow .desc{font-size:13px; color:var(--ink-soft);}
+  .checkrow .desc b{color:var(--ink); font-weight:600;}
+
+  .btn{
+    margin-top:18px;
+    background:var(--pine);
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:3px;
+    font-size:14px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .btn:hover{background:#1a2f22;}
+  .btn.secondary{background:none; color:var(--danger); border:1px solid var(--danger);}
+  .btn.secondary:hover{background:#fbf0ed;}
+  .btn.small{margin-top:0; padding:5px 11px; font-size:12.5px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:4px;}
+  th{
+    text-align:left; color:var(--ink-soft); font-weight:600;
+    padding:8px 8px; border-bottom:1px solid var(--sand-dark); font-size:12.5px;
+    white-space:nowrap;
+  }
+  td{padding:9px 8px; border-bottom:1px solid var(--sand); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .tablewrap{overflow-x:auto;}
+  .pill{display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap;}
+  .pill.on{background:#E4EEE2; color:var(--pine);}
+  .pill.off{background:var(--sand); color:var(--ink-soft);}
+  .pill.warn{background:#F3E3D3; color:var(--clay);}
+  .pill.bad{background:#F1DEDA; color:var(--danger);}
+  .pill.eco-bronze{background:#EFE1D2; color:#8A5A2B;}
+  .pill.eco-silver{background:#E7E7E2; color:#5A6153;}
+  .pill.eco-gold{background:#F4E6BE; color:#8A6D1D;}
+  .empty{color:var(--ink-soft); font-size:13.5px; padding:14px 0;}
+
+  .alert-banner{
+    background:#F3E3D3;
+    border:1px solid var(--clay);
+    border-radius:4px;
+    padding:12px 16px;
+    margin-bottom:18px;
+    font-size:13.5px;
+    color:#7A4A1E;
+  }
+  .alert-banner b{color:#5E3711;}
+
+  /* ---------- Certificate modal ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(21,42,29,.55);
+    align-items:center; justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  .modal-overlay.show{display:flex;}
+  .cert{
+    background:#FFFDF7;
+    border:6px double var(--pine);
+    border-radius:4px;
+    max-width:480px;
+    width:100%;
+    padding:34px 30px;
+    text-align:center;
+    position:relative;
+  }
+  .cert .cert-leaf{width:36px; height:36px; margin:0 auto 10px auto;}
+  .cert h2{font-size:20px; margin-bottom:2px;}
+  .cert .cert-sub{font-size:12px; color:var(--ink-soft); letter-spacing:.3px; margin-bottom:20px;}
+  .cert .cert-name{font-family:Georgia,serif; font-size:24px; color:var(--pine); margin:10px 0;}
+  .cert .cert-body{font-size:13.5px; color:var(--ink-soft); line-height:1.6;}
+  .cert .cert-badge{margin:16px 0;}
+  .cert .cert-actions{margin-top:22px; display:flex; gap:10px; justify-content:center;}
+  @media print{
+    body.printing-cert > *:not(#cert-modal){display:none !important;}
+    #cert-modal{position:static !important; background:none !important; padding:0 !important;}
+    #cert-modal .cert-actions{display:none !important;}
+  }
+  .small-btn{
+    background:none; border:1px solid var(--sand-dark); color:var(--ink-soft);
+    padding:4px 10px; font-size:12px; border-radius:3px; cursor:pointer; margin-right:4px;
+  }
+  .small-btn:hover{border-color:var(--moss); color:var(--pine);}
+  .small-btn.danger:hover{border-color:var(--danger); color:var(--danger);}
+  .flex-between{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;}
+
+  .bar-row{display:flex; align-items:center; gap:10px; margin:10px 0;}
+  .bar-row .name{width:140px; font-size:13px; color:var(--ink-soft); flex-shrink:0;}
+  .bar-track{flex:1; background:var(--sand); height:10px; border-radius:5px; overflow:hidden;}
+  .bar-fill{height:100%; background:var(--moss); border-radius:5px;}
+  .bar-row .val{width:80px; text-align:right; font-size:12.5px; color:var(--ink-soft);}
+
+  .settings-note{
+    background:#F1EEE2; border:1px solid var(--sand-dark); border-radius:3px;
+    padding:12px 14px; font-size:12.5px; color:var(--ink-soft); margin-top:16px;
+  }
+
+  .bill-box{
+    border:1px dashed var(--sand-dark);
+    padding:16px 18px;
+    border-radius:4px;
+    background:var(--bg);
+    font-size:13.5px;
+    max-width:420px;
+  }
+  .bill-box .line{display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--sand);}
+  .bill-box .line.total{font-weight:700; color:var(--pine); border-bottom:none; padding-top:9px;}
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div class="headbar">
+    <div class="brand">
+      <svg class="leaf" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 20C4 12 9 4 20 4C20 15 12 20 4 20Z" fill="#5B7A5E"/>
+        <path d="M4 20C8 14 12 10 20 4" stroke="#EFEBDD" stroke-width="1"/>
+      </svg>
+      <div>
+        <div class="name">GreenStay</div>
+        <div class="sub">Hotel Management System</div>
+      </div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button data-tab="home" class="active">Home</button>
+    <button data-tab="rooms">Rooms</button>
+    <button data-tab="bookings">Bookings</button>
+    <button data-tab="guests">Guests</button>
+    <button data-tab="housekeeping">Housekeeping</button>
+    <button data-tab="billing">Billing</button>
+    <button data-tab="resources">Resource log</button>
+    <button data-tab="dashboard">Dashboard</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ================= HOME ================= -->
+  <section class="panel active" id="home">
+    <div class="hero">
+      <svg class="leafbg" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 20C4 12 9 4 20 4C20 15 12 20 4 20Z"/>
+      </svg>
+      <h2>Run the hotel. Watch its footprint too.</h2>
+      <p>GreenStay brings rooms, bookings, housekeeping and billing together with a built-in sustainability module — every towel skipped and every litre saved shows up on the same dashboard as revenue and occupancy, guests earn a printable eco-certificate, and unusual water usage triggers its own alert.</p>
+      <div class="cta-row">
+        <button class="btn" onclick="goTab('bookings')">New booking</button>
+        <button class="btn ghost" onclick="goTab('dashboard')">View dashboard</button>
+      </div>
+    </div>
+
+    <div class="stats-row" id="home-stats"></div>
+
+    <div class="card">
+      <h3>Modules</h3>
+      <p class="hint">Jump into any part of the system.</p>
+      <div class="module-grid">
+        <button class="module-card" onclick="goTab('rooms')"><div class="ico">🛏️</div><h3>Rooms</h3><p>Add rooms, set rates, track availability.</p></button>
+        <button class="module-card" onclick="goTab('bookings')"><div class="ico">📅</div><h3>Bookings</h3><p>Book, check in and check out guests.</p></button>
+        <button class="module-card" onclick="goTab('guests')"><div class="ico">🧑‍🤝‍🧑</div><h3>Guests</h3><p>Directory of everyone who's stayed.</p></button>
+        <button class="module-card" onclick="goTab('housekeeping')"><div class="ico">🧹</div><h3>Housekeeping</h3><p>Today's room-by-room service list.</p></button>
+        <button class="module-card" onclick="goTab('billing')"><div class="ico">🧾</div><h3>Billing</h3><p>Generate and settle guest bills.</p></button>
+        <button class="module-card" onclick="goTab('resources')"><div class="ico">💧</div><h3>Green module</h3><p>Log water, power, waste — see what's saved.</p></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ROOMS ================= -->
+  <section class="panel" id="rooms">
+    <div class="card">
+      <h3>Add a room</h3>
+      <div class="row3">
+        <div>
+          <label for="rm-number">Room number</label>
+          <input type="text" id="rm-number" placeholder="e.g. 204">
+        </div>
+        <div>
+          <label for="rm-type">Room type</label>
+          <select id="rm-type">
+            <option>Standard</option>
+            <option>Deluxe</option>
+            <option>Suite</option>
+          </select>
+        </div>
+        <div>
+          <label for="rm-price">Rate per night (₹)</label>
+          <input type="number" id="rm-price" min="0" placeholder="e.g. 2500">
+        </div>
+      </div>
+      <button class="btn" onclick="addRoom()">Add room</button>
+    </div>
+
+    <div class="card">
+      <h3>Room inventory</h3>
+      <div class="tablewrap" id="rooms-table"></div>
+    </div>
+  </section>
+
+  <!-- ================= BOOKINGS ================= -->
+  <section class="panel" id="bookings">
+    <div class="card">
+      <h3>New booking</h3>
+      <div class="row2">
+        <div>
+          <label for="bk-guest">Guest name</label>
+          <input type="text" id="bk-guest" placeholder="e.g. R. Sharma">
+        </div>
+        <div>
+          <label for="bk-phone">Phone</label>
+          <input type="tel" id="bk-phone" placeholder="e.g. 98765 43210">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="bk-room">Room</label>
+          <select id="bk-room"></select>
+        </div>
+        <div>
+          <label for="bk-advance">Advance paid (₹)</label>
+          <input type="number" id="bk-advance" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="bk-checkin">Check-in date</label>
+          <input type="date" id="bk-checkin">
+        </div>
+        <div>
+          <label for="bk-checkout">Check-out date</label>
+          <input type="date" id="bk-checkout">
+        </div>
+      </div>
+
+      <label style="margin-top:20px;">Green preferences for this stay</label>
+      <div class="checkrow">
+        <input type="checkbox" id="bk-towel">
+        <div class="desc"><label style="margin:0;display:inline;" for="bk-towel"><b>Skip daily towel replacement</b></label></div>
+      </div>
+      <div class="checkrow">
+        <input type="checkbox" id="bk-linen">
+        <div class="desc"><label style="margin:0;display:inline;" for="bk-linen"><b>Skip daily bedsheet change</b></label></div>
+      </div>
+      <div class="checkrow">
+        <input type="checkbox" id="bk-toiletries">
+        <div class="desc"><label style="margin:0;display:inline;" for="bk-toiletries"><b>Reuse toiletries</b></label></div>
+      </div>
+      <button class="btn" onclick="addBooking()">Create booking</button>
+    </div>
+
+    <div class="card">
+      <h3>All bookings</h3>
+      <div class="tablewrap" id="bookings-table"></div>
+    </div>
+  </section>
+
+  <!-- ================= GUESTS ================= -->
+  <section class="panel" id="guests">
+    <div class="card">
+      <div class="flex-between">
+        <h3>Guest directory</h3>
+        <input type="text" id="gs-search" placeholder="Search by name or phone" style="width:220px;" oninput="renderGuests()">
+      </div>
+      <div class="tablewrap" id="guests-table"></div>
+    </div>
+  </section>
+
+  <!-- ================= HOUSEKEEPING ================= -->
+  <section class="panel" id="housekeeping">
+    <div class="card">
+      <h3>Today's housekeeping view</h3>
+      <p class="hint">Generated from currently checked-in bookings and their green preferences.</p>
+      <div class="tablewrap" id="hk-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= BILLING ================= -->
+  <section class="panel" id="billing">
+    <div class="card">
+      <h3>Generate a bill</h3>
+      <label for="bl-booking">Select booking</label>
+      <select id="bl-booking" onchange="renderBillPreview()"></select>
+      <div id="bill-preview" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>Billing history</h3>
+      <div class="tablewrap" id="billing-table"></div>
+    </div>
+  </section>
+
+  <!-- ================= RESOURCE LOG ================= -->
+  <section class="panel" id="resources">
+    <div class="card">
+      <h3>Log resource usage</h3>
+      <p class="hint">Record consumption or waste readings for the property.</p>
+      <div class="row2">
+        <div>
+          <label for="rl-date">Date</label>
+          <input type="date" id="rl-date">
+        </div>
+        <div>
+          <label for="rl-cat">Category</label>
+          <select id="rl-cat">
+            <option value="water">💧 Water (L)</option>
+            <option value="electricity">⚡ Electricity (kWh)</option>
+            <option value="laundry">🧺 Laundry loads</option>
+            <option value="food">🍽️ Food waste (kg)</option>
+            <option value="plastic">🧴 Plastic (kg)</option>
+            <option value="waste">🗑️ General waste (kg)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="rl-amount">Amount</label>
+          <input type="number" id="rl-amount" min="0" step="0.1" placeholder="0">
+        </div>
+        <div>
+          <label for="rl-note">Note (optional)</label>
+          <input type="text" id="rl-note" placeholder="e.g. Banquet hall, floor 2">
+        </div>
+      </div>
+      <button class="btn" onclick="saveLog()">Add entry</button>
+    </div>
+
+    <div class="card">
+      <h3>Recent entries</h3>
+      <div class="tablewrap" id="rl-table"></div>
+    </div>
+  </section>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section class="panel" id="dashboard">
+    <div id="dash-alert"></div>
+    <div class="stats-row" id="dash-stats"></div>
+
+    <div class="card">
+      <h3>Resource totals (all logged entries)</h3>
+      <div id="dash-bars"></div>
+    </div>
+
+    <div class="card">
+      <h3>Rooms opted into a green preference</h3>
+      <div class="tablewrap" id="dash-optin"></div>
+    </div>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <section class="panel" id="settings">
+    <div class="card">
+      <h3>Savings assumptions</h3>
+      <p class="hint">The dashboard's "water saved" figure is calculated from these values.</p>
+      <label for="st-towel">Litres saved per skipped towel change</label>
+      <input type="number" id="st-towel" min="0" step="1">
+      <label for="st-linen">Litres saved per skipped linen change</label>
+      <input type="number" id="st-linen" min="0" step="1">
+      <label for="st-minutes">Housekeeping minutes saved per skipped service</label>
+      <input type="number" id="st-minutes" min="0" step="1">
+      <label for="st-alert">Water usage alert threshold (L/day)</label>
+      <input type="number" id="st-alert" min="0" step="10">
+      <button class="btn" onclick="saveSettings()">Save assumptions</button>
+      <div class="settings-note">These are configurable estimates for demo/reporting purposes, not a universal fixed number.</div>
+    </div>
+
+    <div class="card">
+      <h3>Reset all data</h3>
+      <p class="hint">Clears rooms, bookings, bills and logged entries stored in this browser.</p>
+      <button class="btn secondary" onclick="resetAll()">Reset everything</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-overlay" id="cert-modal-overlay">
+  <div class="cert" id="cert-modal">
+    <svg class="cert-leaf" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 20C4 12 9 4 20 4C20 15 12 20 4 20Z" fill="#5B7A5E"/>
+    </svg>
+    <div class="cert-sub">GREENSTAY HOTEL · CERTIFICATE OF ENVIRONMENTAL CONTRIBUTION</div>
+    <h2>This certificate is presented to</h2>
+    <div class="cert-name" id="cert-guest-name">—</div>
+    <div class="cert-badge" id="cert-badge-pill"></div>
+    <div class="cert-body" id="cert-body-text"></div>
+    <div class="cert-actions">
+      <button class="btn" onclick="printCertificate()">Print certificate</button>
+      <button class="btn ghost" style="color:var(--ink-soft); border:1px solid var(--sand-dark);" onclick="closeCertificate()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORE_KEY = "greenstayHMS";
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {
+    rooms: [],      // {id, number, type, price, status}
+    bookings: [],   // {id, guest, phone, roomId, checkIn, checkOut, status, towel, linen, toiletries, advance, price, paid}
+    logs: [],       // {id, date, cat, amount, note}
+    settings: { towelSaving: 20, linenSaving: 15, waterAlert: 500, minutesPerService: 8 }
+  };
+}
+let data = loadData();
+function persist(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+
+// ---------- Tabs ----------
+function goTab(tab){
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id===tab));
+  renderAll();
+}
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>goTab(btn.dataset.tab));
+});
+
+// ---------- Helpers ----------
+function findRoom(id){ return data.rooms.find(r=>r.id===id); }
+function findBooking(id){ return data.bookings.find(b=>b.id===id); }
+function nightsBetween(a,b){
+  const d1=new Date(a), d2=new Date(b);
+  const diff = Math.round((d2-d1)/(1000*60*60*24));
+  return diff>0?diff:1;
+}
+function fmtMoney(n){ return '₹' + (n||0).toLocaleString('en-IN'); }
+
+// ---------- Eco score & certificate ----------
+function ecoScore(b){ return [b.towel,b.linen,b.toiletries].filter(Boolean).length; }
+function ecoBadge(b){
+  const s = ecoScore(b);
+  if(s>=3) return {label:'🥇 Gold', cls:'eco-gold'};
+  if(s===2) return {label:'🥈 Silver', cls:'eco-silver'};
+  if(s===1) return {label:'🥉 Bronze', cls:'eco-bronze'};
+  return null;
+}
+function openCertificate(id){
+  const b = findBooking(id);
+  if(!b) return;
+  const room = findRoom(b.roomId);
+  const badge = ecoBadge(b) || {label:'Participant', cls:'eco-bronze'};
+  const water = (b.towel?data.settings.towelSaving:0) + (b.linen?data.settings.linenSaving:0);
+  const items = [b.towel&&'skipping daily towel replacement', b.linen&&'skipping daily linen change', b.toiletries&&'reusing toiletries'].filter(Boolean).join(', ') || 'supporting the hotel\'s green initiatives';
+  document.getElementById('cert-guest-name').textContent = b.guest;
+  document.getElementById('cert-badge-pill').innerHTML = `<span class="pill ${badge.cls}" style="font-size:13px; padding:5px 14px;">${badge.label} contributor</span>`;
+  document.getElementById('cert-body-text').innerHTML =
+    `During the stay in Room ${room?room.number:'—'} (${b.checkIn} to ${b.checkOut}), by ${items}, an estimated <b>${water.toLocaleString()} litres</b> of water were saved.<br><br>Thank you for helping GreenStay reduce its environmental footprint.`;
+  document.getElementById('cert-modal-overlay').classList.add('show');
+}
+function closeCertificate(){ document.getElementById('cert-modal-overlay').classList.remove('show'); }
+function printCertificate(){
+  document.body.classList.add('printing-cert');
+  window.print();
+}
+window.addEventListener('afterprint', ()=>document.body.classList.remove('printing-cert'));
+
+// ---------- Rooms ----------
+function addRoom(){
+  const number = document.getElementById('rm-number').value.trim();
+  const type = document.getElementById('rm-type').value;
+  const price = parseFloat(document.getElementById('rm-price').value);
+  if(!number){ alert('Enter a room number.'); return; }
+  if(data.rooms.find(r=>r.number===number)){ alert('That room number already exists.'); return; }
+  if(isNaN(price) || price<0){ alert('Enter a valid rate.'); return; }
+  data.rooms.push({ id: Date.now(), number, type, price, status:'available' });
+  persist();
+  document.getElementById('rm-number').value='';
+  document.getElementById('rm-price').value='';
+  renderAll();
+}
+function removeRoom(id){
+  if(data.bookings.some(b=>b.roomId===id && b.status!=='checked-out')){
+    alert('This room has an active booking — check it out first.'); return;
+  }
+  data.rooms = data.rooms.filter(r=>r.id!==id);
+  persist(); renderAll();
+}
+function renderRooms(){
+  const el = document.getElementById('rooms-table');
+  if(data.rooms.length===0){ el.innerHTML='<div class="empty">No rooms added yet.</div>'; return; }
+  const statusPill = s => s==='occupied' ? '<span class="pill warn">Occupied</span>' : s==='maintenance' ? '<span class="pill bad">Maintenance</span>' : '<span class="pill on">Available</span>';
+  el.innerHTML = `<table>
+    <tr><th>Room</th><th>Type</th><th>Rate/night</th><th>Status</th><th></th></tr>
+    ${data.rooms.map(r=>`
+      <tr>
+        <td>${r.number}</td>
+        <td>${r.type}</td>
+        <td>${fmtMoney(r.price)}</td>
+        <td>${statusPill(r.status)}</td>
+        <td><button class="small-btn danger" onclick="removeRoom(${r.id})">Remove</button></td>
+      </tr>`).join('')}
+  </table>`;
+}
+
+// ---------- Bookings ----------
+function refreshRoomSelect(){
+  const sel = document.getElementById('bk-room');
+  const available = data.rooms.filter(r=>r.status==='available');
+  sel.innerHTML = available.length
+    ? available.map(r=>`<option value="${r.id}">Room ${r.number} — ${r.type} (${fmtMoney(r.price)}/night)</option>`).join('')
+    : '<option value="">No available rooms</option>';
+}
+function addBooking(){
+  const guest = document.getElementById('bk-guest').value.trim();
+  const phone = document.getElementById('bk-phone').value.trim();
+  const roomId = parseInt(document.getElementById('bk-room').value);
+  const checkIn = document.getElementById('bk-checkin').value;
+  const checkOut = document.getElementById('bk-checkout').value;
+  const advance = parseFloat(document.getElementById('bk-advance').value)||0;
+  if(!guest){ alert('Enter the guest name.'); return; }
+  if(!roomId){ alert('Select a room.'); return; }
+  if(!checkIn || !checkOut){ alert('Pick check-in and check-out dates.'); return; }
+  if(new Date(checkOut) <= new Date(checkIn)){ alert('Check-out must be after check-in.'); return; }
+  const room = findRoom(roomId);
+
+  data.bookings.push({
+    id: Date.now(), guest, phone, roomId, checkIn, checkOut,
+    status:'checked-in',
+    towel: document.getElementById('bk-towel').checked,
+    linen: document.getElementById('bk-linen').checked,
+    toiletries: document.getElementById('bk-toiletries').checked,
+    advance, price: room.price, paid:false
+  });
+  room.status = 'occupied';
+  persist();
+
+  ['bk-guest','bk-phone','bk-advance'].forEach(id=>document.getElementById(id).value='');
+  ['bk-towel','bk-linen','bk-toiletries'].forEach(id=>document.getElementById(id).checked=false);
+  renderAll();
+}
+function checkoutBooking(id){
+  const b = findBooking(id);
+  if(!b) return;
+  b.status = 'checked-out';
+  const room = findRoom(b.roomId);
+  if(room) room.status = 'available';
+  persist(); renderAll();
+}
+function removeBooking(id){
+  const b = findBooking(id);
+  if(b && b.status!=='checked-out'){
+    const room = findRoom(b.roomId);
+    if(room) room.status='available';
+  }
+  data.bookings = data.bookings.filter(x=>x.id!==id);
+  persist(); renderAll();
+}
+function renderBookings(){
+  const el = document.getElementById('bookings-table');
+  refreshRoomSelect();
+  if(data.bookings.length===0){ el.innerHTML='<div class="empty">No bookings yet.</div>'; return; }
+  const statusPill = s => s==='checked-in' ? '<span class="pill warn">Checked in</span>' : s==='checked-out' ? '<span class="pill off">Checked out</span>' : '<span class="pill on">Upcoming</span>';
+  el.innerHTML = `<table>
+    <tr><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Eco score</th><th>Status</th><th></th></tr>
+    ${data.bookings.slice().reverse().map(b=>{
+      const room = findRoom(b.roomId);
+      const badge = ecoBadge(b);
+      return `<tr>
+        <td>${b.guest}${b.phone?'<br><span style="color:var(--ink-soft);font-size:12px;">'+b.phone+'</span>':''}</td>
+        <td>${room?room.number:'—'}</td>
+        <td>${b.checkIn}</td>
+        <td>${b.checkOut}</td>
+        <td>${badge ? `<span class="pill ${badge.cls}">${badge.label}</span>` : '—'}</td>
+        <td>${statusPill(b.status)}</td>
+        <td>
+          ${b.status==='checked-in' ? `<button class="small-btn" onclick="checkoutBooking(${b.id})">Check out</button>` : ''}
+          ${badge ? `<button class="small-btn" onclick="openCertificate(${b.id})">🎖 Certificate</button>` : ''}
+          <button class="small-btn danger" onclick="removeBooking(${b.id})">Remove</button>
+        </td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+// ---------- Guests ----------
+function renderGuests(){
+  const el = document.getElementById('guests-table');
+  const q = (document.getElementById('gs-search')?.value||'').toLowerCase();
+  let rows = data.bookings.filter(b => b.guest.toLowerCase().includes(q) || (b.phone||'').includes(q));
+  if(rows.length===0){ el.innerHTML='<div class="empty">No guests found.</div>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>Guest</th><th>Phone</th><th>Room</th><th>Stay</th><th>Status</th></tr>
+    ${rows.slice().reverse().map(b=>{
+      const room = findRoom(b.roomId);
+      return `<tr>
+        <td>${b.guest}</td>
+        <td>${b.phone||'—'}</td>
+        <td>${room?room.number:'—'}</td>
+        <td>${b.checkIn} → ${b.checkOut}</td>
+        <td>${b.status}</td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+// ---------- Housekeeping ----------
+function renderHousekeeping(){
+  const el = document.getElementById('hk-list');
+  const active = data.bookings.filter(b=>b.status==='checked-in');
+  if(active.length===0){ el.innerHTML='<div class="empty">No occupied rooms right now.</div>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>Room</th><th>Guest</th><th>Towel service</th><th>Linen service</th><th>Toiletries</th></tr>
+    ${active.map(b=>{
+      const room = findRoom(b.roomId);
+      return `<tr>
+        <td>${room?room.number:'—'}</td>
+        <td>${b.guest}</td>
+        <td>${b.towel?'Not required':'Replace towels'}</td>
+        <td>${b.linen?'Not required':'Change sheets'}</td>
+        <td>${b.toiletries?'Refill only if empty':'Restock as usual'}</td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+// ---------- Billing ----------
+function refreshBillingSelect(){
+  const sel = document.getElementById('bl-booking');
+  const eligible = data.bookings.filter(b=>b.status!=='upcoming');
+  sel.innerHTML = eligible.length
+    ? eligible.map(b=>{
+        const room=findRoom(b.roomId);
+        return `<option value="${b.id}">${b.guest} — Room ${room?room.number:'—'} (${b.checkIn} → ${b.checkOut})</option>`;
+      }).join('')
+    : '<option value="">No bookings to bill yet</option>';
+}
+function renderBillPreview(){
+  const id = parseInt(document.getElementById('bl-booking').value);
+  const el = document.getElementById('bill-preview');
+  const b = findBooking(id);
+  if(!b){ el.innerHTML=''; return; }
+  const room = findRoom(b.roomId);
+  const nights = nightsBetween(b.checkIn, b.checkOut);
+  const roomTotal = nights * b.price;
+  const balance = roomTotal - (b.advance||0);
+  el.innerHTML = `<div class="bill-box">
+    <div class="line"><span>Room ${room?room.number:'—'} × ${nights} night(s)</span><span>${fmtMoney(roomTotal)}</span></div>
+    <div class="line"><span>Advance paid</span><span>- ${fmtMoney(b.advance||0)}</span></div>
+    <div class="line total"><span>Balance due</span><span>${fmtMoney(balance)}</span></div>
+  </div>
+  <button class="btn" onclick="markPaid(${b.id})">${b.paid?'Marked as paid':'Mark as paid'}</button>`;
+}
+function markPaid(id){
+  const b = findBooking(id);
+  if(b){ b.paid = true; persist(); renderAll(); }
+}
+function renderBillingHistory(){
+  const el = document.getElementById('billing-table');
+  const billed = data.bookings.filter(b=>b.status!=='upcoming');
+  if(billed.length===0){ el.innerHTML='<div class="empty">No bills generated yet.</div>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>Guest</th><th>Room</th><th>Nights</th><th>Total</th><th>Payment</th></tr>
+    ${billed.slice().reverse().map(b=>{
+      const room = findRoom(b.roomId);
+      const nights = nightsBetween(b.checkIn, b.checkOut);
+      const total = nights*b.price;
+      return `<tr>
+        <td>${b.guest}</td>
+        <td>${room?room.number:'—'}</td>
+        <td>${nights}</td>
+        <td>${fmtMoney(total)}</td>
+        <td>${b.paid?'<span class="pill on">Paid</span>':'<span class="pill warn">Pending</span>'}</td>
+      </tr>`;
+    }).join('')}
+  </table>`;
+}
+
+// ---------- Resource log ----------
+const CAT_LABELS = {
+  water:'💧 Water (L)', electricity:'⚡ Electricity (kWh)', laundry:'🧺 Laundry loads',
+  food:'🍽️ Food waste (kg)', plastic:'🧴 Plastic (kg)', waste:'🗑️ General waste (kg)'
+};
+function saveLog(){
+  const date = document.getElementById('rl-date').value || new Date().toISOString().slice(0,10);
+  const cat = document.getElementById('rl-cat').value;
+  const amount = parseFloat(document.getElementById('rl-amount').value);
+  const note = document.getElementById('rl-note').value.trim();
+  if(isNaN(amount) || amount<0){ alert('Enter a valid amount.'); return; }
+  data.logs.unshift({ id: Date.now(), date, cat, amount, note });
+  persist();
+  document.getElementById('rl-amount').value='';
+  document.getElementById('rl-note').value='';
+  renderAll();
+}
+function removeLog(id){ data.logs = data.logs.filter(l=>l.id!==id); persist(); renderAll(); }
+function renderLogTable(){
+  const el = document.getElementById('rl-table');
+  if(data.logs.length===0){ el.innerHTML='<div class="empty">No entries logged yet.</div>'; return; }
+  el.innerHTML = `<table>
+    <tr><th>Date</th><th>Category</th><th>Amount</th><th>Note</th><th></th></tr>
+    ${data.logs.slice(0,25).map(l=>`
+      <tr>
+        <td>${l.date}</td><td>${CAT_LABELS[l.cat]}</td><td>${l.amount}</td><td>${l.note||'—'}</td>
+        <td><button class="small-btn danger" onclick="removeLog(${l.id})">Remove</button></td>
+      </tr>`).join('')}
+  </table>`;
+}
+
+// ---------- Dashboard & Home stats ----------
+function computeStats(){
+  const totalRooms = data.rooms.length;
+  const occupied = data.rooms.filter(r=>r.status==='occupied').length;
+  const available = data.rooms.filter(r=>r.status==='available').length;
+  const activeBookings = data.bookings.filter(b=>b.status==='checked-in');
+  const towelsSkipped = activeBookings.filter(b=>b.towel).length;
+  const linenSkipped = activeBookings.filter(b=>b.linen).length;
+  const waterSaved = towelsSkipped*(data.settings.towelSaving||0) + linenSkipped*(data.settings.linenSaving||0);
+  const revenue = data.bookings.filter(b=>b.status==='checked-out'||b.status==='checked-in')
+    .reduce((sum,b)=> sum + nightsBetween(b.checkIn,b.checkOut)*b.price, 0);
+  const occupancyPct = totalRooms ? Math.round((occupied/totalRooms)*100) : 0;
+  const staffMinutesSaved = (towelsSkipped + linenSkipped) * (data.settings.minutesPerService || 0);
+  const bucketsSaved = Math.round(waterSaved / 15); // 1 bucket ≈ 15L, common Indian household reference
+  const goldStays = activeBookings.filter(b=>ecoScore(b)>=3).length;
+
+  const waterByDate = {};
+  data.logs.filter(l=>l.cat==='water').forEach(l=>{ waterByDate[l.date] = (waterByDate[l.date]||0) + l.amount; });
+  const threshold = data.settings.waterAlert || Infinity;
+  const highUsageDays = Object.entries(waterByDate).filter(([d,amt])=>amt>threshold);
+
+  return { totalRooms, occupied, available, activeBookings, towelsSkipped, linenSkipped, waterSaved, revenue, occupancyPct, staffMinutesSaved, bucketsSaved, goldStays, highUsageDays };
+}
+function renderHomeStats(){
+  const s = computeStats();
+  document.getElementById('home-stats').innerHTML = `
+    <div class="stat"><div class="num">${s.totalRooms}</div><div class="lbl">Total rooms</div></div>
+    <div class="stat clay"><div class="num">${s.occupied}</div><div class="lbl">Occupied now</div></div>
+    <div class="stat"><div class="num">${s.available}</div><div class="lbl">Available now</div></div>
+    <div class="stat"><div class="num">${fmtMoney(s.revenue)}</div><div class="lbl">Revenue (billed stays)</div></div>
+    <div class="stat water"><div class="num">${s.waterSaved.toLocaleString()} L</div><div class="lbl">Water saved</div></div>
+  `;
+}
+function renderDashboard(){
+  const s = computeStats();
+
+  const bannerEl = document.getElementById('dash-alert');
+  if(s.highUsageDays.length){
+    bannerEl.innerHTML = `<div class="alert-banner">⚠️ <b>Unusual water usage detected</b> — ${s.highUsageDays.map(([d,amt])=>`${d} (${amt.toLocaleString()} L)`).join(', ')} crossed the ${data.settings.waterAlert.toLocaleString()} L/day alert threshold. Worth checking for leaks or an unlogged event.</div>`;
+  } else {
+    bannerEl.innerHTML = '';
+  }
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat"><div class="num">${s.occupancyPct}%</div><div class="lbl">Occupancy rate</div></div>
+    <div class="stat"><div class="num">${s.towelsSkipped}</div><div class="lbl">Towel changes skipped</div></div>
+    <div class="stat"><div class="num">${s.linenSkipped}</div><div class="lbl">Linen changes skipped</div></div>
+    <div class="stat clay"><div class="num">${s.waterSaved.toLocaleString()} L</div><div class="lbl">Estimated water saved</div></div>
+    <div class="stat"><div class="num">${fmtMoney(s.revenue)}</div><div class="lbl">Revenue (billed stays)</div></div>
+    <div class="stat water"><div class="num">≈ ${s.bucketsSaved.toLocaleString()}</div><div class="lbl">Buckets of water saved (15 L each)</div></div>
+    <div class="stat"><div class="num">${Math.round(s.staffMinutesSaved/60*10)/10} hrs</div><div class="lbl">Housekeeping time saved</div></div>
+    <div class="stat clay"><div class="num">${s.goldStays}</div><div class="lbl">🥇 Gold eco-stays right now</div></div>
+  `;
+
+  const totals = {};
+  Object.keys(CAT_LABELS).forEach(c=>totals[c]=0);
+  data.logs.forEach(l=>{ totals[l.cat]=(totals[l.cat]||0)+l.amount; });
+  const max = Math.max(1, ...Object.values(totals));
+  document.getElementById('dash-bars').innerHTML = data.logs.length
+    ? Object.keys(CAT_LABELS).map(c=>{
+        const pct = Math.round((totals[c]/max)*100);
+        return `<div class="bar-row">
+          <div class="name">${CAT_LABELS[c]}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="val">${totals[c].toLocaleString()}</div>
+        </div>`;
+      }).join('')
+    : '<div class="empty">Log some entries to see totals here.</div>';
+
+  const optIn = data.bookings.filter(b=>b.status==='checked-in' && (b.towel||b.linen||b.toiletries));
+  document.getElementById('dash-optin').innerHTML = optIn.length ? `<table>
+    <tr><th>Room</th><th>Guest</th><th>Opted into</th></tr>
+    ${optIn.map(b=>{
+      const room = findRoom(b.roomId);
+      const items=[];
+      if(b.towel) items.push('towel skip');
+      if(b.linen) items.push('linen skip');
+      if(b.toiletries) items.push('toiletry reuse');
+      return `<tr><td>${room?room.number:'—'}</td><td>${b.guest}</td><td>${items.join(', ')}</td></tr>`;
+    }).join('')}
+  </table>` : '<div class="empty">No checked-in rooms have a green preference yet.</div>';
+}
+
+// ---------- Settings ----------
+function saveSettings(){
+  const t = parseFloat(document.getElementById('st-towel').value);
+  const l = parseFloat(document.getElementById('st-linen').value);
+  const m = parseFloat(document.getElementById('st-minutes').value);
+  const a = parseFloat(document.getElementById('st-alert').value);
+  data.settings.towelSaving = isNaN(t) ? data.settings.towelSaving : t;
+  data.settings.linenSaving = isNaN(l) ? data.settings.linenSaving : l;
+  data.settings.minutesPerService = isNaN(m) ? data.settings.minutesPerService : m;
+  data.settings.waterAlert = isNaN(a) ? data.settings.waterAlert : a;
+  persist(); renderAll();
+  alert('Assumptions saved.');
+}
+function resetAll(){
+  if(!confirm('This clears all rooms, bookings, bills and log entries. Continue?')) return;
+  data = { rooms: [], bookings: [], logs: [], settings: { towelSaving:20, linenSaving:15, waterAlert:500, minutesPerService:8 } };
+  persist(); renderAll();
+}
+function fillSettingsForm(){
+  document.getElementById('st-towel').value = data.settings.towelSaving;
+  document.getElementById('st-linen').value = data.settings.linenSaving;
+  document.getElementById('st-minutes').value = data.settings.minutesPerService;
+  document.getElementById('st-alert').value = data.settings.waterAlert;
+}
+
+function renderAll(){
+  renderHomeStats();
+  renderRooms();
+  renderBookings();
+  renderGuests();
+  renderHousekeeping();
+  refreshBillingSelect();
+  renderBillPreview();
+  renderBillingHistory();
+  renderLogTable();
+  renderDashboard();
+  fillSettingsForm();
+}
+
+document.getElementById('rl-date').value = new Date().toISOString().slice(0,10);
+renderAll();
+</script>
+
+</body>
+</html>

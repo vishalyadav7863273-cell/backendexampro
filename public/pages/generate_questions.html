@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamPro — AI Question Generator</title>
+<style>
+  :root {
+    --primary: #5b21b6; --primary-light: #7c3aed; --primary-dark: #3b0764;
+    --accent: #06b6d4; --success: #059669; --danger: #dc2626; --warning: #d97706;
+    --bg: #f5f3ff; --card: #fff; --text: #1e1b4b; --muted: #6b7280;
+    --border: #ede9fe;
+  }
+  body.dark { --bg:#100820; --card:#1a0d30; --text:#e8eaf6; --muted:#9fa8da; --border:#2d1b4e; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  /* ── Navbar ── */
+  .nav {
+    background:linear-gradient(120deg,#3b0764,#5b21b6);
+    padding:0 2rem; height:60px; display:flex; align-items:center;
+    justify-content:space-between; box-shadow:0 2px 16px rgba(0,0,0,0.3);
+    position:sticky; top:0; z-index:100;
+  }
+  .nav-brand { font-size:1.2rem; font-weight:800; color:white; display:flex; align-items:center; gap:8px; }
+  .nav-brand span { background:linear-gradient(135deg,#06b6d4,#7c3aed); padding:4px 10px; border-radius:6px; font-size:0.85rem; }
+  .nav-right { display:flex; gap:8px; }
+  .nav-btn { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:white; padding:7px 16px; border-radius:8px; cursor:pointer; font-size:0.85rem; transition:all 0.2s; }
+  .nav-btn:hover { background:rgba(255,255,255,0.22); }
+  .nav-btn.accent { background:var(--accent); border-color:var(--accent); color:#060e3a; font-weight:700; }
+
+  /* ── Layout ── */
+  .layout { max-width:1200px; margin:0 auto; padding:28px 2rem; display:grid; grid-template-columns:360px 1fr; gap:24px; }
+  @media(max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+  /* ── Panel shared ── */
+  .panel { background:var(--card); border:1.5px solid var(--border); border-radius:18px; overflow:hidden; }
+  .panel-head { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .panel-head h2 { font-size:1rem; font-weight:800; color:var(--primary); }
+  .panel-head .ph-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+  .panel-body { padding:20px 22px; }
+
+  /* ── AI Form ── */
+  .field { margin-bottom:16px; }
+  .label { font-size:0.78rem; font-weight:700; color:var(--text); display:block; margin-bottom:6px; letter-spacing:0.3px; }
+  .input, .select, .textarea {
+    width:100%; padding:10px 14px; border:1.5px solid var(--border);
+    border-radius:10px; font-size:0.9rem; background:var(--bg); color:var(--text);
+    outline:none; transition:all 0.2s; font-family:inherit;
+  }
+  .input:focus,.select:focus,.textarea:focus { border-color:var(--primary-light); background:var(--card); box-shadow:0 0 0 3px rgba(91,33,182,0.1); }
+  .textarea { resize:vertical; min-height:80px; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .chip-group { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .chip {
+    padding:5px 12px; background:var(--bg); border:1.5px solid var(--border);
+    border-radius:20px; font-size:0.75rem; font-weight:600; color:var(--muted);
+    cursor:pointer; transition:all 0.2s;
+  }
+  .chip:hover { border-color:var(--primary-light); color:var(--primary); }
+  .chip.active { background:var(--primary); color:white; border-color:var(--primary); }
+
+  /* Generate button */
+  .gen-btn {
+    width:100%; padding:13px; border-radius:12px; border:none; cursor:pointer;
+    font-size:1rem; font-weight:800; color:white;
+    background:linear-gradient(135deg,#3b0764,#5b21b6,#7c3aed);
+    box-shadow:0 4px 18px rgba(91,33,182,0.3); transition:all 0.2s;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .gen-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(91,33,182,0.4); }
+  .gen-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+  .spinner { width:18px; height:18px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to{ transform:rotate(360deg); } }
+
+  /* Status */
+  .status-box { padding:12px 16px; border-radius:10px; font-size:0.85rem; line-height:1.6; margin-top:14px; }
+  .status-box.info    { background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; }
+  .status-box.success { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+  .status-box.error   { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+
+  /* ── Preview / Output panel ── */
+  .output-toolbar {
+    padding:14px 20px; background:var(--bg); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .output-info { font-size:0.85rem; color:var(--muted); }
+  .output-info strong { color:var(--primary); }
+  .toolbar-btns { display:flex; gap:8px; flex-wrap:wrap; }
+  .tbtn {
+    padding:7px 16px; border-radius:8px; font-size:0.82rem; font-weight:700;
+    cursor:pointer; border:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;
+  }
+  .tbtn-primary { background:linear-gradient(135deg,#5b21b6,#7c3aed); color:white; }
+  .tbtn-primary:hover { box-shadow:0 4px 14px rgba(91,33,182,0.35); transform:translateY(-1px); }
+  .tbtn-outline { background:var(--card); border:1.5px solid var(--border); color:var(--text); }
+  .tbtn-outline:hover { border-color:var(--primary); color:var(--primary); }
+  .tbtn-success { background:linear-gradient(135deg,#059669,#10b981); color:white; }
+  .tbtn-success:hover { box-shadow:0 4px 14px rgba(5,150,105,0.35); }
+  .tbtn-danger  { background:linear-gradient(135deg,#dc2626,#ef4444); color:white; }
+  .tbtn-danger:hover  { box-shadow:0 4px 14px rgba(220,38,38,0.35); }
+
+  /* Tabs */
+  .tabs { display:flex; border-bottom:1px solid var(--border); }
+  .tab { padding:11px 20px; font-size:0.85rem; font-weight:700; color:var(--muted); cursor:pointer; border-bottom:2.5px solid transparent; transition:all 0.2s; }
+  .tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* Question list */
+  .q-list { padding:16px 20px; max-height:520px; overflow-y:auto; }
+  .q-list::-webkit-scrollbar { width:4px; }
+  .q-list::-webkit-scrollbar-thumb { background:var(--primary); border-radius:2px; }
+
+  .q-item {
+    background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+    padding:16px 18px; margin-bottom:12px; position:relative; transition:all 0.2s;
+  }
+  .q-item:hover { border-color:#c4b5fd; box-shadow:0 4px 14px rgba(91,33,182,0.08); }
+  .q-num { font-size:0.7rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+  .q-text-inp { width:100%; padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:0.88rem; background:var(--card); color:var(--text); margin-bottom:10px; outline:none; }
+  .q-text-inp:focus { border-color:var(--primary-light); }
+  .q-opts { display:flex; flex-direction:column; gap:6px; }
+  .q-opt-row { display:flex; align-items:center; gap:8px; }
+  .q-opt-radio { cursor:pointer; width:15px; height:15px; accent-color:var(--success); }
+  .q-opt-inp { flex:1; padding:7px 11px; border:1.5px solid var(--border); border-radius:7px; font-size:0.82rem; background:var(--card); color:var(--text); outline:none; }
+  .q-opt-inp:focus { border-color:var(--primary-light); }
+  .q-opt-row.correct .q-opt-inp { border-color:var(--success); background:#d1fae5; }
+  .q-del-btn { position:absolute; top:12px; right:12px; background:var(--danger); border:none; color:white; width:26px; height:26px; border-radius:6px; cursor:pointer; font-size:0.8rem; display:flex; align-items:center; justify-content:center; }
+
+  /* JSON view */
+  .json-view {
+    padding:16px 20px; max-height:520px; overflow:auto;
+    font-family:'Consolas','Courier New',monospace; font-size:0.8rem; line-height:1.6;
+  }
+  .json-view::-webkit-scrollbar { width:4px; }
+  .json-view::-webkit-scrollbar-thumb { background:var(--primary); border-radius:2px; }
+  pre { white-space:pre-wrap; color:var(--text); }
+  .jk { color:#7c3aed; } .js { color:#059669; } .jn { color:#d97706; } .jb { color:#06b6d4; }
+
+  /* Empty state */
+  .empty { padding:60px 20px; text-align:center; color:var(--muted); }
+  .empty-icon { font-size:3rem; margin-bottom:12px; opacity:0.4; }
+  .empty h3 { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .empty p { font-size:0.85rem; }
+
+  /* Import section */
+  .import-zone {
+    border:2.5px dashed var(--border); border-radius:14px; padding:32px;
+    text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:16px;
+  }
+  .import-zone:hover,.import-zone.dragover { border-color:var(--primary); background:#ede9fe; }
+  .import-zone .iz-icon { font-size:2.5rem; margin-bottom:10px; }
+  .import-zone p { font-size:0.88rem; color:var(--muted); }
+  .import-zone strong { color:var(--primary); }
+
+  /* Exam meta form */
+  .meta-form { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  @media(max-width:600px){ .meta-form{ grid-template-columns:1fr; } }
+
+  /* Toast */
+  #toast { position:fixed; bottom:20px; right:20px; z-index:999; display:flex; flex-direction:column; gap:6px; }
+  .t-item { background:#1a0d30; color:white; padding:11px 16px; border-radius:10px; font-size:0.85rem; box-shadow:0 4px 18px rgba(0,0,0,0.3); animation:tIn 0.3s ease; max-width:300px; display:flex; align-items:center; gap:8px; }
+  .t-item.s { border-left:4px solid #059669; }
+  .t-item.e { border-left:4px solid #dc2626; }
+  .t-item.i { border-left:4px solid #06b6d4; }
+  @keyframes tIn { from{transform:translateX(80px);opacity:0;} to{transform:none;opacity:1;} }
+
+  /* Dark mode */
+  body.dark .input, body.dark .select, body.dark .textarea,
+  body.dark .q-text-inp, body.dark .q-opt-inp { background:var(--bg); border-color:var(--border); color:var(--text); }
+  body.dark .q-item { background:#200545; }
+  body.dark .chip { background:#200545; border-color:var(--border); }
+  body.dark .import-zone:hover { background:#200545; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">
+    <a href="index.html" style="color:white;text-decoration:none;display:flex;align-items:center;gap:6px;opacity:0.7;font-size:0.85rem;font-weight:600;">← ExamPro</a>
+    <span style="color:rgba(255,255,255,0.3);margin:0 6px;">|</span>
+    📝 <span>AI Question Studio</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="toggleDark()" id="dmBtn">🌙</button>
+    <a class="nav-btn" href="index.html" style="text-decoration:none;">🏠 Main App</a>
+    <button class="nav-btn accent" onclick="downloadJSON()" id="dlBtn" disabled>⬇️ Download JSON</button>
+  </div>
+</nav>
+
+<!-- HOW TO USE BANNER -->
+<div id="howBanner" style="background:linear-gradient(135deg,#3b0764,#5b21b6);padding:12px 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.9);font-size:0.85rem;">
+      <span style="background:rgba(255,255,255,0.15);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">1</span>
+      Topic likhke AI se questions generate karo
+    </div>
+    <span style="color:rgba(255,255,255,0.3);">→</span>
+    <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.9);font-size:0.85rem;">
+      <span style="background:rgba(255,255,255,0.15);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">2</span>
+      Edit / review karo
+    </div>
+    <span style="color:rgba(255,255,255,0.3);">→</span>
+    <div style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.9);font-size:0.85rem;">
+      <span style="background:rgba(255,255,255,0.15);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">3</span>
+      Download JSON
+    </div>
+    <span style="color:rgba(255,255,255,0.3);">→</span>
+    <div style="display:flex;align-items:center;gap:8px;color:#22d3ee;font-size:0.85rem;font-weight:700;">
+      <span style="background:rgba(6,182,212,0.25);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">4</span>
+      ExamPro → Admin → Create Exam → Import JSON ✅
+    </div>
+  </div>
+  <button onclick="document.getElementById('howBanner').style.display='none'" style="background:transparent;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:1rem;padding:4px;">✕</button>
+</div>
+
+<div id="toast"></div>
+
+<div class="layout">
+
+  <!-- ── LEFT: Generator Panel ── -->
+  <div>
+
+    <!-- Exam Meta -->
+    <div class="panel" style="margin-bottom:18px;">
+      <div class="panel-head">
+        <div class="ph-icon" style="background:#ede9fe;">📋</div>
+        <h2>Exam Details</h2>
+      </div>
+      <div class="panel-body">
+        <div class="field"><label class="label">Exam Title *</label><input class="input" id="metaTitle" placeholder="e.g. Python Basics Quiz"></div>
+        <div class="field"><label class="label">Subject *</label><input class="input" id="metaSubject" placeholder="e.g. Computer Science"></div>
+        <div class="field"><label class="label">Description</label><textarea class="textarea" id="metaDesc" rows="2" placeholder="Short description..."></textarea></div>
+        <div class="row2">
+          <div class="field"><label class="label">Duration (min)</label><input class="input" id="metaDuration" type="number" value="30" min="5"></div>
+          <div class="field"><label class="label">Passing Score (%)</label><input class="input" id="metaPassing" type="number" value="60" min="1" max="100"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Generator -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-icon" style="background:#1a0d30;">🤖</div>
+        <h2>AI Question Generator</h2>
+      </div>
+      <div class="panel-body">
+        <div class="field">
+          <label class="label">Topic / Subject *</label>
+          <input class="input" id="aiTopic" placeholder="e.g. Binary Trees, SQL Joins, Python OOP..." onkeydown="if(event.key==='Enter')generate()">
+          <div class="chip-group" id="topicChips">
+            <span class="chip" onclick="setTopic(this,'Data Structures')">Data Structures</span>
+            <span class="chip" onclick="setTopic(this,'DBMS & SQL')">DBMS & SQL</span>
+            <span class="chip" onclick="setTopic(this,'Operating Systems')">Operating Systems</span>
+            <span class="chip" onclick="setTopic(this,'Python Programming')">Python</span>
+            <span class="chip" onclick="setTopic(this,'Computer Networks')">Networks</span>
+            <span class="chip" onclick="setTopic(this,'OOP Java')">OOP Java</span>
+            <span class="chip" onclick="setTopic(this,'Web Development HTML CSS JS')">Web Dev</span>
+            <span class="chip" onclick="setTopic(this,'Software Engineering SDLC')">Software Engg</span>
+            <span class="chip" onclick="setTopic(this,'Artificial Intelligence')">AI</span>
+            <span class="chip" onclick="setTopic(this,'Cloud Computing AWS')">Cloud</span>
+            <span class="chip" onclick="setTopic(this,'Cyber Security Cryptography')">Cyber Security</span>
+            <span class="chip" onclick="setTopic(this,'Compiler Design')">Compiler</span>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label class="label">Number of Questions</label>
+            <select class="select" id="aiCount">
+              <option value="5">5 Questions</option>
+              <option value="10" selected>10 Questions</option>
+              <option value="15">15 Questions</option>
+              <option value="20">20 Questions</option>
+              <option value="25">25 Questions</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label">Difficulty Level</label>
+            <select class="select" id="aiDiff">
+              <option value="easy">🟢 Easy</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="hard">🔴 Hard</option>
+              <option value="mixed">🌈 Mixed</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Options per Question</label>
+          <select class="select" id="aiOpts">
+            <option value="3">3 Options</option>
+            <option value="4" selected>4 Options</option>
+            <option value="5">5 Options</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label">Language / Style</label>
+          <select class="select" id="aiLang">
+            <option value="english">English (Standard)</option>
+            <option value="simple">Simple English (Easy to understand)</option>
+            <option value="technical">Technical (Advanced vocabulary)</option>
+          </select>
+        </div>
+
+        <button class="gen-btn" id="genBtn" onclick="generate()">
+          <span id="genBtnInner">⚡ Generate Questions with AI</span>
+        </button>
+        <div id="aiStatus" class="hidden"></div>
+
+        <!-- Import JSON -->
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+          <label class="label" style="margin-bottom:8px;">📂 Import Existing JSON File</label>
+          <div class="import-zone" id="importZone" onclick="document.getElementById('jsonFile').click()" ondragover="dragOver(event)" ondrop="dropFile(event)" ondragleave="dragLeave(event)">
+            <div class="iz-icon">📁</div>
+            <p><strong>Click to browse</strong> ya file yahan drag & drop karo</p>
+            <p style="font-size:0.75rem;margin-top:4px;">Supports: questions.json (ExamPro format)</p>
+          </div>
+          <input type="file" id="jsonFile" accept=".json" style="display:none" onchange="importJSON(event)">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: Preview / Output ── -->
+  <div class="panel">
+    <div class="output-toolbar">
+      <div class="output-info">
+        Questions: <strong id="qCount">0</strong> &nbsp;|&nbsp;
+        Exam: <strong id="qExam">—</strong>
+      </div>
+      <div class="toolbar-btns">
+        <button class="tbtn tbtn-outline" onclick="addBlankQ()">➕ Add Question</button>
+        <button class="tbtn tbtn-outline" onclick="clearAll()">🗑️ Clear All</button>
+        <button class="tbtn tbtn-success" onclick="downloadJSON()" id="dlBtn2">⬇️ Download JSON</button>
+        <button class="tbtn tbtn-primary" onclick="copyToClipboard()">📋 Copy JSON</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('preview',this)">✏️ Edit Questions</div>
+      <div class="tab" onclick="switchTab('json',this)">{ } JSON View</div>
+      <div class="tab" onclick="switchTab('howto',this)">❓ How to Use</div>
+    </div>
+
+    <!-- Edit Questions Tab -->
+    <div class="tab-content active" id="tab-preview">
+      <div class="q-list" id="qList">
+        <div class="empty">
+          <div class="empty-icon">🤖</div>
+          <h3>Koi questions nahi hain abhi</h3>
+          <p>Left side se topic likhke "Generate" karo<br>ya JSON file import karo</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON View Tab -->
+    <div class="tab-content" id="tab-json">
+      <div class="json-view">
+        <pre id="jsonPre"><span style="color:var(--muted);">// Pehle questions generate karo...</span></pre>
+      </div>
+    </div>
+
+    <!-- How to Use Tab -->
+    <div class="tab-content" id="tab-howto">
+      <div style="padding:24px 28px;max-height:520px;overflow-y:auto;font-size:0.88rem;line-height:1.8;color:var(--text);">
+        <h3 style="color:var(--primary);font-size:1.1rem;margin-bottom:16px;">📖 JSON File kaise use karein?</h3>
+
+        <div style="background:#ede9fe;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
+          <strong style="color:#5b21b6;">Step 1 — Questions Generate karo</strong><br>
+          Left side pe topic likhke AI se generate karo, ya manually add karo.
+        </div>
+        <div style="background:#d1fae5;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
+          <strong style="color:#065f46;">Step 2 — JSON Download karo</strong><br>
+          "Download JSON" button click karo — <code>questions.json</code> file save hogi.
+        </div>
+        <div style="background:#ecfeff;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
+          <strong style="color:#0e7490;">Step 3 — Main App mein Import karo</strong><br>
+          ExamPro → Admin Panel → Create Exam → "Import from JSON" button click karo → downloaded file select karo → questions auto-load ho jayenge!
+        </div>
+        <div style="background:#fef3c7;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
+          <strong style="color:#92400e;">📋 JSON File Format</strong><br>
+          Yeh file ExamPro ka standard format follow karti hai:
+          <ul style="margin-top:8px;padding-left:18px;color:var(--muted);">
+            <li><code>title</code> — Exam ka naam</li>
+            <li><code>subject</code> — Subject</li>
+            <li><code>duration</code> — Minutes mein</li>
+            <li><code>passingScore</code> — Pass percentage</li>
+            <li><code>questions[]</code> — Question array</li>
+            <li><code>questions[].text</code> — Question text</li>
+            <li><code>questions[].options[]</code> — 3-5 options</li>
+            <li><code>questions[].correct</code> — 0-based correct index</li>
+          </ul>
+        </div>
+        <div style="background:#fee2e2;border-radius:10px;padding:16px 18px;">
+          <strong style="color:#991b1b;">⚠️ Important Notes</strong><br>
+          <ul style="margin-top:6px;padding-left:18px;color:var(--muted);">
+            <li>Correct answer index 0 se start hota hai (pehla option = 0)</li>
+            <li>Minimum 2 options, maximum 6 options per question</li>
+            <li>JSON file edit karke manually bhi questions likh sakte ho</li>
+            <li>Ek JSON file mein multiple exams rakh sakte ho</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────
+let questions = [];
+let examMeta  = { title:'', subject:'', description:'', duration:30, passingScore:60 };
+
+// ── Dark Mode ─────────────────────────────────────────────────
+let dark = localStorage.getItem('ep_darkmode') === 'true';
+if (dark) { document.body.classList.add('dark'); }
+function toggleDark() {
+  dark = !dark;
+  document.body.classList.toggle('dark', dark);
+  localStorage.setItem('ep_darkmode', dark);
+  const btn = document.getElementById('dmBtn');
+  if (btn) btn.textContent = dark ? '☀️' : '🌙';
+}
+// Apply icon on load
+window.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('dmBtn');
+  if (btn) btn.textContent = dark ? '☀️' : '🌙';
+});
+
+// ── Toast ─────────────────────────────────────────────────────
+function toast(msg, type='i') {
+  const t = document.getElementById('toast');
+  const d = document.createElement('div');
+  d.className = 't-item ' + type;
+  d.textContent = msg;
+  t.appendChild(d);
+  setTimeout(() => d.remove(), 3500);
+}
+
+// ── Topic chips ───────────────────────────────────────────────
+function setTopic(el, topic) {
+  document.getElementById('aiTopic').value = topic;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Tab switch ────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'json') refreshJSON();
+}
+
+// ── AI Generate ───────────────────────────────────────────────
+async function generate() {
+  const topic = document.getElementById('aiTopic').value.trim();
+  const count = document.getElementById('aiCount').value;
+  const diff  = document.getElementById('aiDiff').value;
+  const opts  = document.getElementById('aiOpts').value;
+  const lang  = document.getElementById('aiLang').value;
+  if (!topic) { toast('Topic likhna zaruri hai!', 'e'); document.getElementById('aiTopic').focus(); return; }
+
+  const btn = document.getElementById('genBtn');
+  const inner = document.getElementById('genBtnInner');
+  const statusEl = document.getElementById('aiStatus');
+  btn.disabled = true;
+  inner.innerHTML = '<div class="spinner"></div> AI generate kar raha hai...';
+  statusEl.className = 'status-box info';
+  statusEl.textContent = `🤖 "${topic}" ke liye ${count} ${diff} questions generate ho rahe hain...`;
+
+  const diffMap = {
+    easy:    'easy and beginner-friendly',
+    medium:  'moderate difficulty with conceptual depth',
+    hard:    'challenging, requiring deep understanding',
+    mixed:   'a mix of easy, medium and hard'
+  };
+  const langMap = {
+    english:   'standard academic English',
+    simple:    'very simple, clear English suitable for beginners',
+    technical: 'technical vocabulary appropriate for advanced students'
+  };
+
+  const prompt = `You are an expert BCA/computer science exam question creator.
+
+Generate exactly ${count} multiple choice questions about "${topic}".
+Difficulty: ${diffMap[diff]}.
+Language style: ${langMap[lang]}.
+Each question must have exactly ${opts} options.
+
+Return ONLY a valid JSON array. No markdown, no explanation, no extra text. Just raw JSON array:
+[
+  {
+    "text": "Clear question text ending with ?",
+    "options": ["Option A", "Option B", "Option C"${opts >= 4 ? ', "Option D"' : ''}${opts >= 5 ? ', "Option E"' : ''}],
+    "correct": 0
+  }
+]
+
+Rules:
+- "correct" is the 0-based index of the correct answer
+- All options must be non-empty and distinct
+- Questions must be unique, clear, and educational
+- No trick questions — each must have a definitively correct answer
+- Cover different aspects of the topic
+- correct index must actually point to the right answer`;
+
+  try {
+    // API key server (.env) par hai. Question Studio ke liye admin login zaroori hai (main site par admin se login karo).
+    const data = await api('POST', '/ai/generate', { prompt });
+    const raw   = data.text.trim();
+    const clean = raw.replace(/```json|```/gi, '').trim();
+    const arr   = JSON.parse(clean);
+    if (!Array.isArray(arr) || !arr.length) throw new Error('Invalid response');
+
+    // Validate each question
+    const valid = arr.filter(q =>
+      q.text && Array.isArray(q.options) && q.options.length >= 2 &&
+      typeof q.correct === 'number' && q.correct < q.options.length
+    );
+    if (!valid.length) throw new Error('No valid questions in response');
+
+    // Append or replace
+    questions = [...questions, ...valid];
+
+    // Auto-fill meta if empty
+    if (!document.getElementById('metaTitle').value)   document.getElementById('metaTitle').value   = topic + ' — ' + diff.charAt(0).toUpperCase()+diff.slice(1) + ' Exam';
+    if (!document.getElementById('metaSubject').value) document.getElementById('metaSubject').value = topic.split(' ')[0];
+
+    renderQList();
+    refreshJSON();
+    updateHeader();
+    enableDownload();
+
+    statusEl.className = 'status-box success';
+    statusEl.textContent = `✅ ${valid.length} questions successfully generated aur add ho gaye! Total: ${questions.length}`;
+    toast(`🎉 ${valid.length} questions add ho gaye!`, 's');
+  } catch(e) {
+    console.error(e);
+    statusEl.className = 'status-box error';
+    statusEl.textContent = '❌ Generation fail: ' + ((e.status === 401 || e.status === 403) ? 'Admin login zaroori hai — pehle main site (index.html) par admin se login karo.' : (e.message || 'Network error'));
+    toast('AI generation fail hua', 'e');
+  } finally {
+    btn.disabled = false;
+    inner.innerHTML = '⚡ Generate Questions with AI';
+  }
+}
+
+// ── Render question list ──────────────────────────────────────
+function renderQList() {
+  const list = document.getElementById('qList');
+  if (!questions.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🤖</div><h3>Koi questions nahi hain abhi</h3><p>Left side se topic likhke "Generate" karo<br>ya JSON file import karo</p></div>`;
+    return;
+  }
+  const labels = ['A','B','C','D','E','F'];
+  list.innerHTML = questions.map((q, qi) => `
+    <div class="q-item" id="qi${qi}">
+      <button class="q-del-btn" onclick="deleteQ(${qi})" title="Delete">✕</button>
+      <div class="q-num">
+        <span>Question ${qi+1}</span>
+        <span style="color:var(--success);font-size:0.72rem;">✓ Correct: Option ${labels[q.correct] || '?'}</span>
+      </div>
+      <input class="q-text-inp" value="${escHtml(q.text)}" placeholder="Question text..." oninput="questions[${qi}].text=this.value;refreshJSON()">
+      <div class="q-opts">
+        ${q.options.map((opt,oi) => `
+          <div class="q-opt-row ${oi === q.correct ? 'correct' : ''}">
+            <input type="radio" class="q-opt-radio" name="correct${qi}" ${oi===q.correct?'checked':''} onchange="setCorrect(${qi},${oi})">
+            <span style="font-size:0.75rem;font-weight:700;color:var(--muted);min-width:18px;">${labels[oi]}</span>
+            <input class="q-opt-inp" value="${escHtml(opt)}" placeholder="Option ${labels[oi]}..." oninput="questions[${qi}].options[${oi}]=this.value;refreshJSON()">
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;">
+        <button onclick="addOption(${qi})" style="font-size:0.72rem;padding:3px 10px;background:transparent;border:1px dashed var(--border);border-radius:6px;cursor:pointer;color:var(--muted);">+ Option</button>
+        <button onclick="moveQ(${qi},-1)" style="font-size:0.72rem;padding:3px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--muted);" ${qi===0?'disabled':''}>↑</button>
+        <button onclick="moveQ(${qi},1)" style="font-size:0.72rem;padding:3px 10px;background:transparent;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--muted);" ${qi===questions.length-1?'disabled':''}>↓</button>
+      </div>
+    </div>`).join('');
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function setCorrect(qi, oi) {
+  questions[qi].correct = oi;
+  renderQList();
+  refreshJSON();
+}
+function deleteQ(qi) { questions.splice(qi,1); renderQList(); refreshJSON(); updateHeader(); }
+function addBlankQ() {
+  questions.push({ text:'', options:['','','',''], correct:0 });
+  renderQList(); refreshJSON(); updateHeader();
+  setTimeout(()=>{ document.getElementById('qList').scrollTop=99999; },50);
+}
+function addOption(qi) {
+  if (questions[qi].options.length >= 6) { toast('Max 6 options!','e'); return; }
+  questions[qi].options.push('');
+  renderQList(); refreshJSON();
+}
+function moveQ(qi, dir) {
+  const to = qi + dir;
+  if (to < 0 || to >= questions.length) return;
+  [questions[qi], questions[to]] = [questions[to], questions[qi]];
+  renderQList(); refreshJSON();
+}
+function clearAll() {
+  if (questions.length && !confirm('Sare questions delete karein?')) return;
+  questions = []; renderQList(); refreshJSON(); updateHeader();
+  document.getElementById('dlBtn').disabled = true;
+  document.getElementById('dlBtn2').style.opacity = '0.5';
+}
+
+// ── JSON refresh ──────────────────────────────────────────────
+function getMetaFromForm() {
+  return {
+    title:        document.getElementById('metaTitle').value.trim()      || 'Untitled Exam',
+    subject:      document.getElementById('metaSubject').value.trim()    || 'General',
+    description:  document.getElementById('metaDesc').value.trim()       || '',
+    duration:     parseInt(document.getElementById('metaDuration').value) || 30,
+    passingScore: parseInt(document.getElementById('metaPassing').value)  || 60,
+  };
+}
+
+function getJSONObj() {
+  const meta = getMetaFromForm();
+  return {
+    version:      "1.0",
+    generated_by: "ExamPro AI Question Generator",
+    generated_at: new Date().toISOString(),
+    exams: [{
+      title:        meta.title,
+      subject:      meta.subject,
+      description:  meta.description,
+      duration:     meta.duration,
+      passingScore: meta.passingScore,
+      totalMarks:   questions.length,
+      questions:    questions.map(q => ({
+        text:    q.text,
+        options: q.options,
+        correct: q.correct
+      }))
+    }]
+  };
+}
+
+function refreshJSON() {
+  const obj = getJSONObj();
+  const raw  = JSON.stringify(obj, null, 2);
+  // Syntax highlight
+  const highlighted = raw
+    .replace(/("(?:[^"\\]|\\.)*")(\s*:)/g, '<span class="jk">$1</span>$2')
+    .replace(/:\s*("(?:[^"\\]|\\.)*")/g,   ': <span class="js">$1</span>')
+    .replace(/:\s*(\d+\.?\d*)/g,            ': <span class="jn">$1</span>')
+    .replace(/:\s*(true|false|null)/g,       ': <span class="jb">$1</span>');
+  document.getElementById('jsonPre').innerHTML = highlighted;
+}
+
+function updateHeader() {
+  document.getElementById('qCount').textContent = questions.length;
+  document.getElementById('qExam').textContent  = document.getElementById('metaTitle').value || '—';
+}
+['metaTitle','metaSubject'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { updateHeader(); refreshJSON(); });
+});
+
+function enableDownload() {
+  document.getElementById('dlBtn').disabled  = false;
+  document.getElementById('dlBtn2').style.opacity = '1';
+}
+
+// ── Download ──────────────────────────────────────────────────
+function downloadJSON() {
+  if (!questions.length) { toast('Koi questions nahi hain abhi!','e'); return; }
+  const obj  = getJSONObj();
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const name = (obj.exams[0].title || 'questions').replace(/[^a-z0-9]/gi,'_').toLowerCase();
+  a.href     = url;
+  a.download = name + '_questions.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ JSON download ho gayi!', 's');
+}
+
+// ── Copy JSON ─────────────────────────────────────────────────
+function copyToClipboard() {
+  if (!questions.length) { toast('Koi questions nahi hain!','e'); return; }
+  navigator.clipboard.writeText(JSON.stringify(getJSONObj(), null, 2))
+    .then(()=>toast('📋 JSON clipboard mein copy ho gayi!','s'))
+    .catch(()=>toast('Copy fail hua','e'));
+}
+
+// ── Import JSON ───────────────────────────────────────────────
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      // Support both flat array and ExamPro format
+      let qs = [];
+      if (Array.isArray(obj)) {
+        qs = obj;
+      } else if (obj.questions) {
+        qs = obj.questions;
+        if (obj.title)        document.getElementById('metaTitle').value   = obj.title;
+        if (obj.subject)      document.getElementById('metaSubject').value = obj.subject;
+        if (obj.description)  document.getElementById('metaDesc').value    = obj.description;
+        if (obj.duration)     document.getElementById('metaDuration').value= obj.duration;
+        if (obj.passingScore) document.getElementById('metaPassing').value = obj.passingScore;
+      } else if (obj.exams && obj.exams[0]) {
+        const ex = obj.exams[0];
+        qs = ex.questions || [];
+        if (ex.title)        document.getElementById('metaTitle').value   = ex.title;
+        if (ex.subject)      document.getElementById('metaSubject').value = ex.subject;
+        if (ex.description)  document.getElementById('metaDesc').value    = ex.description;
+        if (ex.duration)     document.getElementById('metaDuration').value= ex.duration;
+        if (ex.passingScore) document.getElementById('metaPassing').value = ex.passingScore;
+      }
+      if (!qs.length) throw new Error('No questions found');
+      questions = [...questions, ...qs];
+      renderQList(); refreshJSON(); updateHeader(); enableDownload();
+      toast(`✅ ${qs.length} questions import ho gaye!`,'s');
+    } catch(err) {
+      toast('JSON parse error: ' + err.message, 'e');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// Drag & Drop
+function dragOver(e)  { e.preventDefault(); document.getElementById('importZone').classList.add('dragover'); }
+function dragLeave()  { document.getElementById('importZone').classList.remove('dragover'); }
+function dropFile(e)  {
+  e.preventDefault(); dragLeave();
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.name.endsWith('.json')) { toast('Sirf .json file accept hogi','e'); return; }
+  const fakeEvt = { target: { files:[file], value:'' } };
+  importJSON(fakeEvt);
+}
+
+// Init
+refreshJSON();
+</script>
+</body>
+</html>
