@@ -2,6 +2,7 @@ const router = require('express').Router();
 const Exam = require('../models/Exam');
 const { nextId } = require('../models/Counter');
 const { optionalAuth, requireAuth, requireAdmin, requireAccess } = require('../middleware/auth');
+const { optionalAuth, requireAuth, requireAdmin, requireExamAccess } = require('../middleware/auth');
 const wrap = require('../utils/wrap');
 
 const HIDE = '-_id -__v';
@@ -26,6 +27,7 @@ router.get('/', optionalAuth, wrap(async (req, res) => {
 
 // GET /api/exams/:id — ek exam. Admin ko "correct" bhi milta hai, student ko nahi.
 router.get('/:id', requireAuth, requireAccess, wrap(async (req, res) => {
+router.get('/:id', requireAuth, requireExamAccess, wrap(async (req, res) => {
   const exam = await Exam.findOne({ id: Number(req.params.id) }).select(HIDE).lean();
   if (!exam) return res.status(404).json({ message: 'Exam not found.' });
   res.json(req.user.role === 'admin' ? exam : stripCorrect(exam));

@@ -3,12 +3,14 @@ const Attempt = require('../models/Attempt');
 const Exam = require('../models/Exam');
 const { nextId } = require('../models/Counter');
 const { requireAuth, requireAdmin, requireAccess } = require('../middleware/auth');
+const { requireAuth, requireAdmin, requireExamAccess } = require('../middleware/auth');
 const wrap = require('../utils/wrap');
 
 const LIST_FIELDS = '-_id -__v -answers';   // list mein answers nahi bhejte (halka rehta hai)
 
 // POST /api/attempts — exam submit. Grading SERVER par hoti hai (student score ke saath chhed-chhad nahi kar sakta)
 router.post('/', requireAuth, requireAccess, wrap(async (req, res) => {
+router.post('/', requireAuth, requireExamAccess, wrap(async (req, res) => {
   const { examId, answers, timeTaken } = req.body || {};
   const exam = await Exam.findOne({ id: Number(examId) }).select('-_id -__v').lean();
   if (!exam) return res.status(404).json({ message: 'Exam not found.' });
@@ -69,4 +71,4 @@ router.get('/:id', requireAuth, wrap(async (req, res) => {
   res.json({ attempt, exam });
 }));
 
-module.exports = router;
+module.exports = router}));
