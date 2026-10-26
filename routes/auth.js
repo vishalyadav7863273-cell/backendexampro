@@ -8,6 +8,7 @@ const PasswordReset = require('../models/PasswordReset');
 const { nextId } = require('../models/Counter');
 const { SECRET, signToken, requireAuth } = require('../middleware/auth');
 const { sendMail } = require('../utils/mailer');
+const Setting = require('../models/Setting');
 const wrap = require('../utils/wrap');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -33,9 +34,36 @@ router.post('/register', wrap(async (req, res) => {
     email, firstName, lastName, rollNumber, course,
     password: await bcrypt.hash(password, 10),
     role: 'student',                       // register se hamesha student hi banega
+    accessGranted: false,                  // admin ka access password dalne tak exam nahi de sakta
     createdAt: Date.now()
   });
   res.status(201).json({ token: signToken(user), user: user.toJSON() });
+}));
+
+// ---------- ACCESS PASSWORD (admin sabhi students ko ek hi password deta hai) ----------
+const sha = (v) => crypto.createHash('sha256').update(String(v)).digest();
+const failMap = new Map();                       // userId -> { n, until }
+const MAX_FAILS = 5, LOCK_MS = 15 * 60 * 1000;
+
+router.post('/verify-access', requireAuth, wrap(async (req, res) => {
+  if (req.user.role === 'admin' || req.user.accessGranted !== false) return res.json({ user: req.user });
+
+  const f = failMap.get(req.user.id);
+  if (f && f.until > Date.now())
+    return res.status(429).json({ message: 'Bahut zyada galat koshish. 15 minute baad dobara try karo.' });
+
+  const entered = typeof (req.body && req.body.password) === 'string' ? req.body.password.trim() : '';
+  const real = (await Setting.get('accessPassword')) || '';
+  if (!entered) return res.status(400).json({ message: 'Access password enter karo.' });
+  if (!real || !crypto.timingSafeEqual(sha(entered), sha(real))) {
+    const expired = f && f.until && f.until <= Date.now();      // purana lock khatam ho chuka ho to gintee dobara shuru
+    const n = (f && !expired ? f.n : 0) + 1;
+    failMap.set(req.user.id, { n, until: n >= MAX_FAILS ? Date.now() + LOCK_MS : 0 });
+    return res.status(401).json({ message: 'Galat access password. Admin se sahi password lo.' });
+  }
+  failMap.delete(req.user.id);
+  const user = await User.findOneAndUpdate({ id: req.user.id }, { accessGranted: true }, { new: true });
+  res.json({ user: user.toJSON() });
 }));
 
 // ---------- LOGIN ----------
@@ -92,20 +120,31 @@ router.post('/forgot/send-otp', wrap(async (req, res) => {
     { upsert: true, new: true }
   );
 
-  let emailed = false;
+  let emailed = false, mailErr = '';
   try {
     emailed = await sendMail({
       to: email,
-      subject: 'ExamPro — Password reset OTP',
-      text: `Aapka ExamPro OTP hai: ${code}\nYeh 10 minute tak valid hai. Agar aapne request nahi ki, to ise ignore karein.`
+      subject: `ExamPro — Password reset OTP: ${code}`,
+      text: `Aapka ExamPro OTP hai: ${code}\nYeh 10 minute tak valid hai. Agar aapne request nahi ki, to ise ignore karein.`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px">
+        <h2 style="margin:0 0 8px;color:#1a237e">ExamPro</h2>
+        <p style="color:#374151">Aapka password reset OTP:</p>
+        <div style="font-size:34px;font-weight:800;letter-spacing:8px;color:#7c3aed;margin:12px 0">${code}</div>
+        <p style="color:#6b7280;font-size:13px">Yeh 10 minute tak valid hai. Agar aapne request nahi ki, to ise ignore karein.</p></div>`
     });
   } catch (e) {
-    console.error('Mail error:', e.message);
+    mailErr = e.message;
+    console.error('❌ OTP email nahi gayi:', e.message);
   }
 
-  if (!emailed) console.log(`🔐 OTP for ${email}: ${code}   (SMTP configured nahi hai, isliye console mein dikha diya)`);
+  if (!emailed) console.log(`🔐 OTP for ${email}: ${code}   (email nahi gayi — .env mein Gmail SMTP set karo)`);
+  // Production mein email fail ho to saaf error do (OTP kabhi screen par nahi dikhta)
+  if (!emailed && isProd) {
+    await PasswordReset.deleteOne({ email });
+    return res.status(502).json({ message: 'OTP email nahi bhej paaye. Admin se kaho .env mein Gmail SMTP check kare.' });
+  }
   // Development mein (SMTP ke bina) OTP response mein bhi bhejte hain taaki screen par dikh sake
-  res.json({ message: 'OTP sent.', devOtp: (!emailed && !isProd) ? code : undefined });
+  res.json({ message: 'OTP sent.', emailed, mailError: mailErr || undefined, devOtp: !emailed ? code : undefined });
 }));
 
 // 2) OTP verify karo -> chhota reset token milega

@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema({
   lastName:   { type: String, default: '', trim: true },
   rollNumber: { type: String, default: '' , trim: true },
   course:     { type: String, default: '' },
+  // Admin ka diya hua access password dalne ke baad true. Purane (legacy) users ke liye default true,
+  // naye register hone wale students ke liye register route ise false set karta hai.
+  accessGranted: { type: Boolean, default: true },
   createdAt:  { type: Number, default: () => Date.now() }
 });
 

@@ -15,6 +15,7 @@ app.use(express.json({ limit: '30mb' }) )   // questions ke saath diagram images
 // ---------- API ----------
 app.use('/api/auth',     require('./routes/auth'));
 app.use('/api/users',    require('./routes/users'));
+app.use('/api/settings', require('./routes/settings'));
 app.use('/api/exams',    require('./routes/exams'));
 app.use('/api/attempts', require('./routes/attempts'));
 app.use('/api/notices',  require('./routes/notices'));
@@ -39,6 +40,10 @@ app.use((err, req, res, next) => {
   try {
     await connectDB();
     await seed();
+    const m = await require('./utils/mailer').verifyMailer();
+    if (!m.configured) console.warn('⚠️  Email (Gmail) set nahi hai — forgot-password OTP email nahi jayega. .env mein GMAIL_USER aur GMAIL_APP_PASSWORD bharo.');
+    else if (!m.ok) console.warn('⚠️  Gmail login fail:', m.error, '\n   App Password sahi hai? (normal Gmail password kaam nahi karta)');
+    else console.log('📧 Email (Gmail) ready — OTP email jayega.');
     app.listen(PORT, () => console.log(`🚀 ExamPro chal raha hai → http://localhost:${PORT}`));
   } catch (err) {
     console.error('\n❌ Server start nahi ho paaya:', err.message);

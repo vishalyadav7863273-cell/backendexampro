@@ -1421,6 +1421,29 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
 <!-- FORGOT PASSWORD PAGE -->
 <!-- ================================================================ -->
 
+<!-- ===== ACCESS PASSWORD GATE (register / login ke baad, exam unlock karne ke liye) ===== -->
+<div id="page-accessGate" class="page">
+  <div class="fp-wrap">
+    <div class="fp-box">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-size:2.8rem;margin-bottom:12px;">🔑</div>
+        <h2 style="font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:8px;">Enter Access Password</h2>
+        <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;">Aapka account ban gaya hai, par exam dene ke liye <strong>admin ka diya hua access password</strong> daalna zaroori hai. Sahi password ke baad aapki profile khul jaayegi.</p>
+      </div>
+      <div id="gateAlert" class="hidden"></div>
+      <div class="afb-group">
+        <label class="afb-label">Access Password (admin se lo)</label>
+        <div class="afb-input-wrap">
+          <span class="afb-input-icon">🔒</span>
+          <input class="afb-input" id="gatePass" type="password" autocomplete="off" placeholder="Admin ka diya password" onkeydown="if(event.key==='Enter')submitAccessPassword()">
+        </div>
+      </div>
+      <button class="fp-btn" onclick="submitAccessPassword()">✅ Unlock &amp; Open Profile</button>
+      <button class="fp-btn-ghost" onclick="logout()">← Logout</button>
+    </div>
+  </div>
+</div>
+
 <div id="page-forgotPassword" class="page">
   <div class="fp-wrap">
     <div class="fp-box">
