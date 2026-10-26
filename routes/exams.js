@@ -2,7 +2,6 @@
 const router = require('express').Router();
 const Exam = require('../models/Exam');
 const { nextId } = require('../models/Counter');
-const { optionalAuth, requireAuth, requireAdmin, requireAccess } = require('../middleware/auth');
 const {
   optionalAuth,
   requireAuth,
@@ -13,7 +12,6 @@ const wrap = require('../utils/wrap');
 
 const HIDE = '-_id -__v';
 
-// Allow only safe image data URLs.
 const IMG_RE =
   /^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/i;
 
@@ -32,28 +30,8 @@ const stripCorrect = (exam) => ({
 });
 
 // GET /api/exams
-// Guests can view the exam list, but not question text.
 router.get('/', optionalAuth, wrap(async (req, res) => {
   const exams = await Exam.find().select(HIDE).sort({ id: 1 }).lean();
-  // list mein images nahi bhejte (page halka rahe) — exam kholte waqt GET /:id se milti hain
-  // Sawal ka text list mein sirf admin ko jaata hai; baaki sabko sirf count (length) ke liye khali placeholders
-  const isAdmin = req.user && req.user.role === 'admin';
-  res.json(exams.map((e) => isAdmin
-    ? stripCorrect({ ...e, questions: (e.questions || []).map(({ image, ...q }) => q) })
-    : { ...e, questions: (e.questions || []).map(() => ({})) }));
-}));
-
-// GET /api/exams/:id — ek exam. Admin ko "correct" bhi milta hai, student ko nahi.
-router.get('/:id', requireAuth, requireAccess, wrap(async (req, res) => {
-  const exam = await Exam.findOne({ id: Number(req.params.id) }).select(HIDE).lean();
-  if (!exam) return res.status(404).json({ message: 'Exam not found.' });
-  res.json(req.user.role === 'admin' ? exam : stripCorrect(exam));
-}));
-  const exams = await Exam.find()
-    .select(HIDE)
-    .sort({ id: 1 })
-    .lean();
-
   const isAdmin = req.user && req.user.role === 'admin';
 
   return res.json(exams.map((exam) => {
@@ -71,35 +49,24 @@ router.get('/:id', requireAuth, requireAccess, wrap(async (req, res) => {
       questions: (exam.questions || []).map(() => ({}))
     };
   }));
-
+}));
 
 // GET /api/exams/:id
-// Admin can view correct answers; students cannot.
-router.get(
-  '/:id',
-  requireAuth,
-  requireExamAccess,
-  wrap(async (req, res) => {
-    const exam = await Exam.findOne({
-      id: Number(req.params.id)
-    }).select(HIDE).lean();
+router.get('/:id', requireAuth, requireExamAccess, wrap(async (req, res) => {
+  const exam = await Exam.findOne({
+    id: Number(req.params.id)
+  }).select(HIDE).lean();
 
-    if (!exam) {
-      return res.status(404).json({
-        message: 'Exam not found.'
-      });
-    }
+  if (!exam) {
+    return res.status(404).json({ message: 'Exam not found.' });
+  }
 
-    if (req.user.role === 'admin') {
-      return res.json(exam);
-    }
-
-    return res.json(stripCorrect(exam));
-  })
-);
+  return res.json(
+    req.user.role === 'admin' ? exam : stripCorrect(exam)
+  );
+}));
 
 // POST /api/exams
-// Admin creates a new exam.
 router.post('/', requireAuth, requireAdmin, wrap(async (req, res) => {
   const b = req.body || {};
 
