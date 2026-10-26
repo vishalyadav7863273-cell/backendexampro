@@ -124,3 +124,14 @@ Admin ka email/password `.env` mein `ADMIN_EMAIL` / `ADMIN_PASSWORD` se badal sa
 | Page khulta hai par login/data nahi aata | Terminal mein `npm start` chal raha hai? URL `http://localhost:5000` hi use karo |
 | `EADDRINUSE` | Port 5000 busy hai — `.env` mein `PORT=5001` karo |
 | AI Generate fail | `.env` mein `ANTHROPIC_API_KEY` hai? Admin se login ho? |
+
+---
+## 🔑 Student Access Password (naya)
+- Student register karta hai → seedha **Access Password** screen aati hai. Admin ka diya password daalne par hi profile/exams khulte hain.
+- Admin → **Students** tab mein password dekh/badal sakta hai, har student ko Lock/Unlock kar sakta hai, ya "sabhi ko dobara lock" kar sakta hai.
+- Server par bhi enforce hota hai (exam kholna, submit karna, proctor start) — frontend bypass se kaam nahi chalega.
+- `.env` mein `ACCESS_PASSWORD` de sakte ho; khali ho to pehli baar random ban kar console mein print hota hai.
+
+## 📧 Forgot Password OTP → Gmail
+`.env` mein bharo: `GMAIL_USER=tumhara@gmail.com` aur `GMAIL_APP_PASSWORD=<16-letter App Password>`
+(Google Account → Security → 2-Step Verification ON → App passwords). Server start par "📧 Email (Gmail) ready" dikhna chahiye.

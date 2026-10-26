@@ -3,7 +3,7 @@ const router = require('express').Router();
 const ExamSession = require('../models/ExamSession');
 const User = require('../models/User');
 const Exam = require('../models/Exam');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireAdmin, requireAccess } = require('../middleware/auth');
 const wrap = require('../utils/wrap');
 
 const REASONS = ['tab_hidden', 'window_blur'];
@@ -17,7 +17,7 @@ async function mySession(req) {
 }
 
 // POST /api/proctor/start — student exam shuru karta hai
-router.post('/start', requireAuth, wrap(async (req, res) => {
+router.post('/start', requireAuth, requireAccess, wrap(async (req, res) => {
   if (req.user.role === 'admin') return res.json({ sessionId: null });
   const examId = Number(req.body && req.body.examId);
   if (!(await Exam.exists({ id: examId }))) return res.status(404).json({ message: 'Exam not found.' });

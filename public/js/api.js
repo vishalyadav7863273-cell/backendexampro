@@ -34,6 +34,8 @@ async function api(method, path, body) {
   if (!res.ok) {
     const err = new Error((data && data.message) || 'Request failed (' + res.status + ')');
     err.status = res.status;
+    err.code = data && data.code;
+    if (err.code === 'ACCESS_REQUIRED' && typeof window.onAccessRequired === 'function') window.onAccessRequired();
     throw err;
   }
   return data;

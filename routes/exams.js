@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Exam = require('../models/Exam');
 const { nextId } = require('../models/Counter');
-const { optionalAuth, requireAuth, requireAdmin } = require('../middleware/auth');
+const { optionalAuth, requireAuth, requireAdmin, requireAccess } = require('../middleware/auth');
 const wrap = require('../utils/wrap');
 
 const HIDE = '-_id -__v';
@@ -17,11 +17,15 @@ const stripCorrect = (exam) => ({
 router.get('/', optionalAuth, wrap(async (req, res) => {
   const exams = await Exam.find().select(HIDE).sort({ id: 1 }).lean();
   // list mein images nahi bhejte (page halka rahe) — exam kholte waqt GET /:id se milti hain
-  res.json(exams.map((e) => stripCorrect({ ...e, questions: (e.questions || []).map(({ image, ...q }) => q) })));
+  // Sawal ka text list mein sirf admin ko jaata hai; baaki sabko sirf count (length) ke liye khali placeholders
+  const isAdmin = req.user && req.user.role === 'admin';
+  res.json(exams.map((e) => isAdmin
+    ? stripCorrect({ ...e, questions: (e.questions || []).map(({ image, ...q }) => q) })
+    : { ...e, questions: (e.questions || []).map(() => ({})) }));
 }));
 
 // GET /api/exams/:id — ek exam. Admin ko "correct" bhi milta hai, student ko nahi.
-router.get('/:id', requireAuth, wrap(async (req, res) => {
+router.get('/:id', requireAuth, requireAccess, wrap(async (req, res) => {
   const exam = await Exam.findOne({ id: Number(req.params.id) }).select(HIDE).lean();
   if (!exam) return res.status(404).json({ message: 'Exam not found.' });
   res.json(req.user.role === 'admin' ? exam : stripCorrect(exam));

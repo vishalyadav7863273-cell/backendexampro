@@ -38,4 +38,11 @@ const requireAdmin = (req, res, next) => {
   return res.status(403).json({ message: 'Admin access required.' });
 };
 
-module.exports = { SECRET, signToken, optionalAuth, requireAuth, requireAdmin };
+// Student ko exam dene se pehle admin ka access password dalna zaroori hai (requireAuth ke baad lagao)
+const requireAccess = (req, res, next) => {
+  if (req.user && req.user.role === 'student' && req.user.accessGranted === false)
+    return res.status(403).json({ code: 'ACCESS_REQUIRED', message: 'Pehle admin ka diya hua access password enter karo.' });
+  next();
+};
+
+module.exports = { SECRET, signToken, optionalAuth, requireAuth, requireAdmin, requireAccess };

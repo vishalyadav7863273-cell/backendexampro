@@ -3,6 +3,8 @@ const User = require('../models/User');
 const Exam = require('../models/Exam');
 const Notice = require('../models/Notice');
 const Counter = require('../models/Counter');
+const Setting = require('../models/Setting');
+const crypto = require('crypto');
 const { nextId } = require('../models/Counter');
 const sampleExams = require('./sampleExams');
 const defaultNotices = require('./defaultNotices');
@@ -24,6 +26,14 @@ module.exports = async function seed() {
       createdAt: Date.now()
     });
     console.log(`👤 Admin account bana diya → ${adminEmail}`);
+  }
+
+  // 1b) Access password — admin sabhi students ko yahi dega. .env mein ACCESS_PASSWORD de sakte ho,
+  //     nahi diya to random ban jaata hai aur yahin console mein dikhta hai (admin panel > Students se badal sakte ho).
+  if (!(await Setting.get('accessPassword'))) {
+    const pw = (process.env.ACCESS_PASSWORD || '').trim() || crypto.randomBytes(4).toString('hex');
+    await Setting.set('accessPassword', pw);
+    console.log(`🔑 Student Access Password: ${pw}   (admin panel → Students mein dikhega aur badal sakte ho)`);
   }
 
   // 2) Sample exams — sirf pehli baar (counter na ho tab). Admin ne sab delete kar diye to dobara nahi aayenge.

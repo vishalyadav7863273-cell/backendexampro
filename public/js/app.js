@@ -94,6 +94,7 @@ setTimeout(async () => {
       currentUser = user;
       setNavForUser(currentUser.role);
       if (currentUser.role === 'admin') { showPage('adminPanel'); showAdminTab('overview'); }
+      else if (currentUser.accessGranted === false) { showPage('accessGate'); }
       else { showPage('studentDash'); refreshStudentDash(); }
     } catch (e) {
       if (e.status === 401) setToken(null);   // token expire ya invalid
@@ -106,7 +107,13 @@ setTimeout(async () => {
 function renderAdminResults() { return renderAllResults(); }
 
 // ===== NAVIGATION =====
+const GATED_PAGES = ['studentDash', 'availableExams', 'myResults', 'studentProfile', 'takingExam', 'result'];
+function isLocked() { return !!(currentUser && currentUser.role === 'student' && currentUser.accessGranted === false); }
+window.onAccessRequired = function () { if (currentUser) currentUser.accessGranted = false; showPage('accessGate'); };
+
 function showPage(page) {
+  if (isLocked() && GATED_PAGES.includes(page)) page = 'accessGate';   // access password ke bina exam wale pages band
+  if (page === 'accessGate') { const g = document.getElementById('gateAlert'); if (g) g.className = 'hidden'; const gp = document.getElementById('gatePass'); if (gp) gp.value = ''; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-' + page);
   if (el) { el.classList.add('active'); window.scrollTo(0, 0); }
@@ -156,6 +163,7 @@ async function doLogin() {
     setNavForUser(user.role);
     toast('Welcome back, ' + user.firstName + '! 👋', 'success');
     if (user.role === 'admin') { showPage('adminPanel'); showAdminTab('overview'); }
+    else if (user.accessGranted === false) { showPage('accessGate'); }
     else { showPage('studentDash'); refreshStudentDash(); }
   } catch(e) { showAlert('loginAlert', e.message || 'Login error. Please try again.', 'error'); }
 }
@@ -178,9 +186,23 @@ async function doRegister() {
     setToken(token);
     currentUser = newUser;
     setNavForUser('student');
-    toast('Account created! Welcome, ' + first + '! 🎉', 'success');
-    showPage('studentDash'); refreshStudentDash();
+    toast('Account created! Ab admin ka diya access password daalo. 🔑', 'success');
+    showPage('accessGate');
   } catch(e) { showAlert('regAlert', e.message || 'Registration failed. Please try again.', 'error'); }
+}
+
+async function submitAccessPassword() {
+  const pw = document.getElementById('gatePass').value;
+  const el = document.getElementById('gateAlert');
+  if (!pw.trim()) { el.className = 'fp-alert err'; el.textContent = '⚠️ Access password enter karo.'; return; }
+  try {
+    const { user } = await api('POST', '/auth/verify-access', { password: pw });
+    currentUser = user;
+    toast('Access unlock ho gaya! Aapki profile khul rahi hai ✅', 'success');
+    showPage('studentProfile');
+  } catch (e) {
+    el.className = 'fp-alert err'; el.textContent = '⚠️ ' + (e.message || 'Password galat hai.');
+  }
 }
 
 function showAlert(id, msg, type) {
@@ -1114,17 +1136,43 @@ async function renderManageStudents() {
   const content = document.getElementById('adminContent');
   content.innerHTML = `
     <div class="admin-content-header"><h2>👥 Students</h2><span class="text-muted">${users.length} registered students</span></div>
+    <div class="table-card" style="padding:18px 20px;margin-bottom:16px;">
+      <h3 style="margin-bottom:6px;">🔑 Student Access Password</h3>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;">Yeh password sabhi students ko do. Register karne ke baad student jab tak yeh password na daale, exam nahi de sakta.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input class="search-input" id="accessPwInput" style="max-width:260px;" placeholder="Access password">
+        <button class="btn btn-blue btn-sm" onclick="saveAccessPassword()">💾 Save Password</button>
+        <label style="font-size:0.82rem;display:flex;gap:6px;align-items:center;"><input type="checkbox" id="accessRelock"> Sabhi students ko dobara lock karo</label>
+      </div>
+    </div>
     <div class="search-bar" style="margin-bottom:16px;">
       <input class="search-input" id="studentSearch" placeholder="🔍 Search by name or roll number..." oninput="filterStudents()">
     </div>
     <div class="table-card" id="studentsTableWrap">
-      <table><thead><tr><th>Student</th><th>Roll No</th><th>Course</th><th>Attempts</th><th>Avg Score</th><th>Registered</th></tr></thead>
+      <table><thead><tr><th>Student</th><th>Roll No</th><th>Course</th><th>Attempts</th><th>Avg Score</th><th>Registered</th><th>Exam Access</th></tr></thead>
       <tbody id="studentsTableBody">${renderStudentRows(users, attempts)}</tbody></table>
     </div>`;
+  allStudentsCache = []; allAttemptsCache = [];
+  try { document.getElementById('accessPwInput').value = (await api('GET', '/settings/access-password')).password || ''; } catch (e) {}
+}
+
+async function saveAccessPassword() {
+  const password = document.getElementById('accessPwInput').value.trim();
+  const relock = document.getElementById('accessRelock').checked;
+  try {
+    const r = await api('PUT', '/settings/access-password', { password, relock });
+    toast('Access password save ho gaya ✅' + (r.relocked ? ' (' + r.relocked + ' students lock hue)' : ''), 'success');
+    if (relock) renderManageStudents();
+  } catch (e) { toast(e.message || 'Save nahi hua', 'error'); }
+}
+
+async function toggleStudentAccess(id, granted) {
+  try { await api('PATCH', '/users/' + id + '/access', { granted }); renderManageStudents(); }
+  catch (e) { toast(e.message || 'Update nahi hua', 'error'); }
 }
 
 function renderStudentRows(users, attempts) {
-  if (users.length === 0) return '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No students registered yet</td></tr>';
+  if (users.length === 0) return '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">No students registered yet</td></tr>';
   return users.map(u => {
     const uAttempts = attempts.filter(a => a.userId === u.id);
     const avg = uAttempts.length ? Math.round(uAttempts.reduce((s,a)=>s+a.percentage,0)/uAttempts.length) : 0;
@@ -1138,6 +1186,9 @@ function renderStudentRows(users, attempts) {
       <td>${uAttempts.length}</td>
       <td><strong style="color:${avg>=60?'var(--success)':'var(--danger)'};">${avg}%</strong></td>
       <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+      <td>${u.accessGranted
+        ? `<span style="color:var(--success);font-weight:700;">✅ Unlocked</span> <button class="btn btn-sm" style="margin-left:6px;" onclick="toggleStudentAccess(${u.id}, false)">Lock</button>`
+        : `<span style="color:var(--danger);font-weight:700;">🔒 Locked</span> <button class="btn btn-blue btn-sm" style="margin-left:6px;" onclick="toggleStudentAccess(${u.id}, true)">Unlock</button>`}</td>
     </tr>`;
   }).join('');
 }
@@ -1661,6 +1712,7 @@ let fpCurrentStep = 1;
 let fpUserEmail = '';
 let fpResetToken = '';
 let fpResendTimer = null;
+let fpDevNote = '';
 
 function goFpStep(step) {
   // hide all panels
@@ -1711,8 +1763,8 @@ async function sendOTP() {
   try {
     const r = await api('POST', '/auth/forgot/send-otp', { email });
     fpUserEmail = email;
-    if (r.devOtp) toast('📧 OTP Sent! Your OTP is: ' + r.devOtp + ' (SMTP set nahi hai, isliye yahin dikha rahe hain)', 'success');
-    else toast('📧 OTP aapke email par bhej diya gaya hai.', 'success');
+    if (r.devOtp) { fpDevNote = 'Email set nahi hai, isliye test OTP yahin hai: <b>' + r.devOtp + '</b>' + (r.mailError ? '<br><small>Mail error: ' + r.mailError + '</small>' : ''); }
+    else { fpDevNote = ''; toast('📧 OTP aapke Gmail par bhej diya gaya hai — phone ka Gmail app bhi check karo.', 'success'); }
 
     // Mask email for display
     const parts = email.split('@');
@@ -1720,6 +1772,7 @@ async function sendOTP() {
     document.getElementById('fpEmailDisplay').textContent = masked;
 
     goFpStep(2);
+    if (fpDevNote) { const a = document.getElementById('fpAlert'); a.className = 'fp-alert ok'; a.innerHTML = '⚠️ ' + fpDevNote; }
     document.getElementById('otp0').focus();
     startResendTimer();
   } catch(e) { showFpAlert(e.message || 'Something went wrong. Please try again.','error'); }
@@ -1771,7 +1824,8 @@ async function verifyOTP() {
 async function resendOTP() {
   try {
     const r = await api('POST', '/auth/forgot/send-otp', { email: fpUserEmail });
-    toast(r.devOtp ? '📧 New OTP sent! Code: ' + r.devOtp : '📧 Naya OTP email par bhej diya gaya.', 'info');
+    if (r.devOtp) { const a = document.getElementById('fpAlert'); a.className = 'fp-alert ok'; a.innerHTML = '⚠️ Email set nahi hai, naya test OTP: <b>' + r.devOtp + '</b>'; }
+    else toast('📧 Naya OTP Gmail par bhej diya gaya.', 'info');
   } catch (e) { showFpAlert(e.message || 'Could not resend OTP.', 'error'); return; }
   // clear boxes
   for (let i=0;i<6;i++) { const el=document.getElementById('otp'+i); el.value=''; el.classList.remove('filled'); }
