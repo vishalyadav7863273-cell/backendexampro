@@ -45,9 +45,7 @@ const requireAccess = (req, res, next) => {
   next();
 };
 
-<<<<<<< HEAD
 module.exports = { SECRET, signToken, optionalAuth, requireAuth, requireAdmin, requireAccess };
-=======
 // Student ko exam dene ke liye admin ka diya hua password enter karna zaroori hai
 const requireExamAccess = (req, res, next) => {
   if (req.user && (req.user.role === 'admin' || req.user.examUnlocked)) return next();
@@ -55,4 +53,3 @@ const requireExamAccess = (req, res, next) => {
 };
 
 module.exports = { SECRET, signToken, optionalAuth, requireAuth, requireAdmin, requireExamAccess };
->>>>>>> 8b2218d74f1d898568ce1134e38262946b2fb285
