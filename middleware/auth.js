@@ -17,7 +17,7 @@ async function loadUser(req) {
   try {
     const payload = jwt.verify(token, SECRET);
     if (payload.purpose) return null;           // password-reset token se login nahi hoga
-    return await User.findOne({ id: payload.id }).select('-_id -__v -password').lean();
+    return await User.findOne({ id: payload.id }).select('-_id -__v -password -examPasswordHash -examPwFailCount -examPwLockedUntil').lean();
   } catch (e) {
     return null;
   }
@@ -38,4 +38,10 @@ const requireAdmin = (req, res, next) => {
   return res.status(403).json({ message: 'Admin access required.' });
 };
 
-module.exports = { SECRET, signToken, optionalAuth, requireAuth, requireAdmin };
+// Student ko exam dene ke liye admin ka diya hua password enter karna zaroori hai
+const requireExamAccess = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || req.user.examUnlocked)) return next();
+  return res.status(403).json({ code: 'EXAM_LOCKED', message: 'Exam dene ke liye admin ka diya hua exam password enter karo.' });
+};
+
+module.exports = { SECRET, signToken, optionalAuth, requireAuth, requireAdmin, requireExamAccess };

@@ -165,20 +165,22 @@ async function doRegister() {
   const last = document.getElementById('regLast').value.trim();
   const email = document.getElementById('regEmail').value.trim();
   const roll = document.getElementById('regRoll').value.trim();
+  const phone = document.getElementById('regPhone').value.replace(/\D/g, '');
   const course = document.getElementById('regCourse').value;
   const pass = document.getElementById('regPass').value;
   const pass2 = document.getElementById('regPass2').value;
-  if (!first || !last || !email || !roll || !course || !pass) { showAlert('regAlert', 'Please fill in all fields.', 'error'); return; }
+  if (!first || !last || !email || !roll || !course || !pass || !phone) { showAlert('regAlert', 'Please fill in all fields.', 'error'); return; }
+  if (!/^[6-9]\d{9}$/.test(phone)) { showAlert('regAlert', 'Please enter a valid 10-digit mobile number.', 'error'); return; }
   if (pass.length < 6) { showAlert('regAlert', 'Password must be at least 6 characters.', 'error'); return; }
   if (pass !== pass2) { showAlert('regAlert', 'Passwords do not match.', 'error'); return; }
   const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailReg.test(email)) { showAlert('regAlert', 'Please enter a valid email.', 'error'); return; }
   try {
-    const { token, user: newUser } = await api('POST', '/auth/register', { email, password: pass, firstName: first, lastName: last, rollNumber: roll, course });
+    const { token, user: newUser } = await api('POST', '/auth/register', { email, password: pass, firstName: first, lastName: last, rollNumber: roll, course, phone });
     setToken(token);
     currentUser = newUser;
     setNavForUser('student');
-    toast('Account created! Welcome, ' + first + '! 🎉', 'success');
+    toast('Account created! Exam dene ke liye admin se exam password lo. 🎉', 'success');
     showPage('studentDash'); refreshStudentDash();
   } catch(e) { showAlert('regAlert', e.message || 'Registration failed. Please try again.', 'error'); }
 }
@@ -215,6 +217,7 @@ async function updateHomeStats() {
 // ===== STUDENT DASHBOARD =====
 async function refreshStudentDash() {
   if (!currentUser) return;
+  document.getElementById('examLockBanner').classList.toggle('hidden', !!currentUser.examUnlocked);
   document.getElementById('sdWelcome').textContent = 'Welcome back, ' + currentUser.firstName + '! 👋';
   document.getElementById('sdSubtitle').textContent = 'Roll: ' + currentUser.rollNumber + ' | ' + currentUser.course;
   const allExams = (await getExams()).filter(e => e.status === 'active');
@@ -320,7 +323,14 @@ async function renderExamCards(exams) {
 // ===== EXAM START MODAL =====
 let pendingExamId = null;
 async function openStartModal(examId) {
-  const exam = await getExam(examId);
+  if (currentUser && currentUser.role !== 'admin' && !currentUser.examUnlocked) { openUnlockModal(); return; }
+  let exam;
+  try { exam = await getExam(examId); }
+  catch (e) {
+    if (e.status === 403) { if (currentUser) currentUser.examUnlocked = false; openUnlockModal(); }
+    else toast(e.message, 'error');
+    return;
+  }
   if (!exam) return;
   pendingExamId = examId;
   document.getElementById('startExamTitle').textContent = '📝 ' + exam.title;
@@ -721,20 +731,66 @@ function loadProfile() {
   document.getElementById('editLast').value = currentUser.lastName;
   document.getElementById('editRoll').value = currentUser.rollNumber;
   document.getElementById('editCourse').value = currentUser.course;
+  const ep = document.getElementById('editPhone'); if (ep) ep.value = currentUser.phone || '';
 }
 
 async function saveProfile() {
   const first = document.getElementById('editFirst').value.trim();
   const last = document.getElementById('editLast').value.trim();
   const pass = document.getElementById('editPass').value;
+  const phone = (document.getElementById('editPhone').value || '').replace(/\D/g, '');
+  if (phone && !/^[6-9]\d{9}$/.test(phone)) { toast('Please enter a valid 10-digit mobile number.', 'error'); return; }
   if (!first || !last) { toast('Name fields cannot be empty.', 'error'); return; }
   if (pass && pass.length < 6) { toast('Password must be at least 6 characters.', 'error'); return; }
   try {
-    const { user } = await api('PUT', '/auth/profile', { firstName: first, lastName: last, password: pass || undefined });
+    const { user } = await api('PUT', '/auth/profile', { firstName: first, lastName: last, password: pass || undefined, phone: phone || undefined });
     currentUser = user;
   } catch (e) { toast(e.message, 'error'); return; }
   loadProfile();
   toast('Profile updated successfully! ✅', 'success');
+}
+
+// ===== EXAM PASSWORD (student side) =====
+function openUnlockModal() {
+  const inp = document.getElementById('examUnlockInput');
+  inp.value = '';
+  document.getElementById('examUnlockAlert').className = 'hidden';
+  document.getElementById('examUnlockModal').classList.remove('hidden');
+  setTimeout(() => inp.focus(), 50);
+}
+async function submitExamUnlock() {
+  const pw = document.getElementById('examUnlockInput').value.trim();
+  if (!pw) { showAlert('examUnlockAlert', 'Please enter the exam password.', 'error'); return; }
+  try {
+    const { user } = await api('POST', '/auth/exam-unlock', { password: pw });
+    currentUser = user;
+    closeModal('examUnlockModal');
+    toast('✅ Exams unlock ho gaye! Ab aap exam de sakte ho.', 'success');
+    const lb = document.getElementById('examLockBanner'); if (lb) lb.classList.add('hidden');
+    if (typeof refreshStudentDash === 'function') refreshStudentDash();
+  } catch (e) { showAlert('examUnlockAlert', e.message || 'Could not unlock. Try again.', 'error'); }
+}
+
+// ===== EXAM PASSWORD (admin side) =====
+let lastExamPw = '';
+async function adminGenExamPw(uid, name) {
+  if (!confirm('Generate a new exam password for ' + name + '?')) return;
+  try {
+    const r = await api('POST', '/users/' + uid + '/exam-password');
+    lastExamPw = r.password;
+    document.getElementById('examPwShowFor').textContent = 'Student: ' + name + ' (' + r.student.email + ')';
+    document.getElementById('examPwShowValue').textContent = r.password;
+    document.getElementById('examPwShowModal').classList.remove('hidden');
+    allStudentsCache = []; showAdminTab('manageStudents');
+  } catch (e) { toast(e.message, 'error'); }
+}
+async function adminRevokeExamAccess(uid, name) {
+  if (!confirm('Revoke exam access for ' + name + '?')) return;
+  try { await api('DELETE', '/users/' + uid + '/exam-access'); toast('Access revoked.', 'info'); allStudentsCache = []; showAdminTab('manageStudents'); }
+  catch (e) { toast(e.message, 'error'); }
+}
+function copyExamPw() {
+  if (navigator.clipboard) navigator.clipboard.writeText(lastExamPw).then(() => toast('Password copied 📋', 'success'));
 }
 
 // ===== ADMIN PANEL =====
@@ -1118,13 +1174,13 @@ async function renderManageStudents() {
       <input class="search-input" id="studentSearch" placeholder="🔍 Search by name or roll number..." oninput="filterStudents()">
     </div>
     <div class="table-card" id="studentsTableWrap">
-      <table><thead><tr><th>Student</th><th>Roll No</th><th>Course</th><th>Attempts</th><th>Avg Score</th><th>Registered</th></tr></thead>
+      <table><thead><tr><th>Student</th><th>Roll No</th><th>Course</th><th>Mobile</th><th>Attempts</th><th>Avg Score</th><th>Exam Access</th><th>Registered</th></tr></thead>
       <tbody id="studentsTableBody">${renderStudentRows(users, attempts)}</tbody></table>
     </div>`;
 }
 
 function renderStudentRows(users, attempts) {
-  if (users.length === 0) return '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No students registered yet</td></tr>';
+  if (users.length === 0) return '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);">No students registered yet</td></tr>';
   return users.map(u => {
     const uAttempts = attempts.filter(a => a.userId === u.id);
     const avg = uAttempts.length ? Math.round(uAttempts.reduce((s,a)=>s+a.percentage,0)/uAttempts.length) : 0;
@@ -1135,8 +1191,12 @@ function renderStudentRows(users, attempts) {
       </div></td>
       <td><span class="chip">${u.rollNumber}</span></td>
       <td style="font-size:0.82rem;">${u.course}</td>
+      <td style="font-size:0.82rem;">${u.phone || '—'}</td>
       <td>${uAttempts.length}</td>
       <td><strong style="color:${avg>=60?'var(--success)':'var(--danger)'};">${avg}%</strong></td>
+      <td>${u.examUnlocked
+          ? `<span class="badge badge-success">✅ Unlocked</span><br><button class="btn btn-sm" style="margin-top:6px;background:white;border:1.5px solid var(--border);" onclick="adminRevokeExamAccess(${u.id}, '${(u.firstName+' '+u.lastName).replace(/'/g,'')}')">Revoke</button>`
+          : `<span class="badge badge-danger">🔒 ${u.examPasswordIssued ? 'Password issued' : 'Locked'}</span><br><button class="btn btn-blue btn-sm" style="margin-top:6px;" onclick="adminGenExamPw(${u.id}, '${(u.firstName+' '+u.lastName).replace(/'/g,'')}')">🔑 ${u.examPasswordIssued ? 'New Password' : 'Give Password'}</button>`}</td>
       <td>${new Date(u.createdAt).toLocaleDateString()}</td>
     </tr>`;
   }).join('');
@@ -1712,12 +1772,13 @@ async function sendOTP() {
     const r = await api('POST', '/auth/forgot/send-otp', { email });
     fpUserEmail = email;
     if (r.devOtp) toast('📧 OTP Sent! Your OTP is: ' + r.devOtp + ' (SMTP set nahi hai, isliye yahin dikha rahe hain)', 'success');
-    else toast('📧 OTP aapke email par bhej diya gaya hai.', 'success');
+    else toast('📧 OTP bhej diya gaya hai' + (r.smsSent ? ' (email + SMS)' : ' (email)') + '.', 'success');
 
-    // Mask email for display
-    const parts = email.split('@');
-    const masked = parts[0].slice(0,2) + '****' + parts[0].slice(-1) + '@' + parts[1];
-    document.getElementById('fpEmailDisplay').textContent = masked;
+    // Kahan bheja gaya wo dikhao (masked)
+    const via = [];
+    if (r.emailSent) via.push('✉️ ' + r.maskedEmail);
+    if (r.smsSent) via.push('📱 +91 ' + r.maskedPhone);
+    document.getElementById('fpEmailDisplay').textContent = via.length ? via.join('   |   ') : r.maskedEmail;
 
     goFpStep(2);
     document.getElementById('otp0').focus();

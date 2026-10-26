@@ -7,12 +7,17 @@ const User = require('../models/User');
 const PasswordReset = require('../models/PasswordReset');
 const { nextId } = require('../models/Counter');
 const { SECRET, signToken, requireAuth } = require('../middleware/auth');
-const { sendMail } = require('../utils/mailer');
+const { sendMail, mailEnabled } = require('../utils/mailer');
+const { sendSms, smsEnabled } = require('../utils/sms');
 const wrap = require('../utils/wrap');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const str = (v) => (typeof v === 'string' ? v.trim() : '');
 const isProd = process.env.NODE_ENV === 'production';
+const PHONE_RE = /^[6-9]\d{9}$/;                       // 10-digit Indian mobile
+const cleanPhone = (v) => String(v || '').replace(/[\s\-()]/g, '').replace(/^(\+91|91|0)(?=\d{10}$)/, '');
+const maskEmail = (e) => { const [a, d] = e.split('@'); return a.slice(0, 2) + '****' + a.slice(-1) + '@' + d; };
+const maskPhone = (p) => p.slice(0, 2) + '******' + p.slice(-2);
 
 // ---------- REGISTER ----------
 router.post('/register', wrap(async (req, res) => {
@@ -21,16 +26,19 @@ router.post('/register', wrap(async (req, res) => {
   const email = str(b.email).toLowerCase();
   const rollNumber = str(b.rollNumber), course = str(b.course);
   const password = typeof b.password === 'string' ? b.password : '';
+  const phone = cleanPhone(b.phone);
 
-  if (!firstName || !lastName || !email || !rollNumber || !course || !password)
+  if (!firstName || !lastName || !email || !rollNumber || !course || !password || !phone)
     return res.status(400).json({ message: 'Please fill in all fields.' });
+  if (!PHONE_RE.test(phone)) return res.status(400).json({ message: 'Please enter a valid 10-digit mobile number.' });
   if (!EMAIL_RE.test(email)) return res.status(400).json({ message: 'Please enter a valid email.' });
   if (password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters.' });
   if (await User.exists({ email })) return res.status(409).json({ message: 'Email already registered.' });
 
   const user = await User.create({
     id: await nextId('users'),
-    email, firstName, lastName, rollNumber, course,
+    email, firstName, lastName, rollNumber, course, phone,
+    examUnlocked: false,                  // admin exam password dene ke baad hi True hoga
     password: await bcrypt.hash(password, 10),
     role: 'student',                       // register se hamesha student hi banega
     createdAt: Date.now()
@@ -66,6 +74,11 @@ router.put('/profile', requireAuth, wrap(async (req, res) => {
   if (!firstName || !lastName) return res.status(400).json({ message: 'Name fields cannot be empty.' });
 
   const update = { firstName, lastName };
+  if (req.body.phone !== undefined && String(req.body.phone).trim() !== '') {
+    const phone = cleanPhone(req.body.phone);
+    if (!PHONE_RE.test(phone)) return res.status(400).json({ message: 'Please enter a valid 10-digit mobile number.' });
+    update.phone = phone;
+  }
   if (password) {
     if (password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters.' });
     update.password = await bcrypt.hash(password, 10);
@@ -86,26 +99,38 @@ router.post('/forgot/send-otp', wrap(async (req, res) => {
   if (user.role === 'admin') return res.status(403).json({ message: 'Admin accounts cannot use password recovery here.' });
 
   const code = String(crypto.randomInt(100000, 1000000));
+  const text = `Aapka ExamPro OTP hai: ${code}. Yeh 10 minute tak valid hai. Kisi ko share na karein.`;
+
+  // Email aur SMS dono try karte hain (jo configured ho). Ek bhi chala to OTP "sent" maana jayega.
+  let emailed = false, texted = false;
+  try {
+    emailed = await sendMail({ to: email, subject: 'ExamPro — Password reset OTP', text: text + '\nAgar aapne request nahi ki, to ise ignore karein.' });
+  } catch (e) { console.error('Mail error:', e.message); }
+  if (user.phone && smsEnabled()) {
+    try { texted = await sendSms(user.phone, text); } catch (e) { console.error('SMS error:', e.message); }
+  }
+
+  const delivered = emailed || texted;
+  // Production mein koi bhi channel kaam nahi kar raha to saaf error do (pehle silently "OTP sent" dikhta tha)
+  if (!delivered && isProd)
+    return res.status(503).json({ message: 'OTP bhej nahi paaye (email/SMS service configured nahi hai). Admin se sampark karein.' });
+
   await PasswordReset.findOneAndUpdate(
     { email },
     { codeHash: await bcrypt.hash(code, 8), attempts: 0, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
     { upsert: true, new: true }
   );
 
-  let emailed = false;
-  try {
-    emailed = await sendMail({
-      to: email,
-      subject: 'ExamPro — Password reset OTP',
-      text: `Aapka ExamPro OTP hai: ${code}\nYeh 10 minute tak valid hai. Agar aapne request nahi ki, to ise ignore karein.`
-    });
-  } catch (e) {
-    console.error('Mail error:', e.message);
-  }
-
-  if (!emailed) console.log(`🔐 OTP for ${email}: ${code}   (SMTP configured nahi hai, isliye console mein dikha diya)`);
-  // Development mein (SMTP ke bina) OTP response mein bhi bhejte hain taaki screen par dikh sake
-  res.json({ message: 'OTP sent.', devOtp: (!emailed && !isProd) ? code : undefined });
+  if (!delivered) console.log(`🔐 OTP for ${email}: ${code}   (SMTP/SMS configured nahi hai — .env mein SMTP_* set karo)`);
+  res.json({
+    message: 'OTP sent.',
+    emailSent: emailed,
+    smsSent: texted,
+    maskedEmail: maskEmail(email),
+    maskedPhone: texted ? maskPhone(user.phone) : undefined,
+    // sirf development mein aur jab koi channel configured na ho
+    devOtp: (!delivered && !isProd) ? code : undefined
+  });
 }));
 
 // 2) OTP verify karo -> chhota reset token milega
@@ -142,6 +167,36 @@ router.post('/forgot/reset', wrap(async (req, res) => {
   user.password = await bcrypt.hash(newPassword, 10);
   await user.save();
   res.json({ message: 'Password reset successfully.' });
+}));
+
+// ---------- EXAM UNLOCK (student admin ka diya hua password enter karta hai) ----------
+router.post('/exam-unlock', requireAuth, wrap(async (req, res) => {
+  if (req.user.role === 'admin') return res.json({ user: { ...req.user, examUnlocked: true } });
+  const pw = typeof req.body.password === 'string' ? req.body.password.trim() : '';
+  if (!pw) return res.status(400).json({ message: 'Please enter the exam password given by your admin.' });
+
+  const user = await User.findOne({ id: req.user.id });
+  if (user.examUnlocked) return res.json({ user: user.toJSON() });
+  if (user.examPwLockedUntil && user.examPwLockedUntil > Date.now()) {
+    const mins = Math.ceil((user.examPwLockedUntil - Date.now()) / 60000);
+    return res.status(429).json({ message: `Too many wrong attempts. Try again in ${mins} minute(s).` });
+  }
+  if (!user.examPasswordHash)
+    return res.status(403).json({ message: 'Admin ne abhi aapko exam password nahi diya. Admin se sampark karein.' });
+
+  if (!(await bcrypt.compare(pw.toUpperCase(), user.examPasswordHash))) {
+    user.examPwFailCount += 1;
+    if (user.examPwFailCount >= 5) { user.examPwLockedUntil = Date.now() + 15 * 60 * 1000; user.examPwFailCount = 0; }
+    await user.save();
+    return res.status(400).json({ message: 'Incorrect exam password.' });
+  }
+  // sahi password -> unlock, aur password ek hi baar use ho sakta hai
+  user.examUnlocked = true;
+  user.examPasswordHash = '';
+  user.examPwFailCount = 0;
+  user.examPwLockedUntil = 0;
+  await user.save();
+  res.json({ user: user.toJSON() });
 }));
 
 module.exports = router;

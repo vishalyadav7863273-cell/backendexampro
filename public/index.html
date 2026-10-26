@@ -576,6 +576,14 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
         </div>
 
         <div class="afb-group">
+          <label class="afb-label">Mobile Number (OTP yahin aayega)</label>
+          <div class="afb-input-wrap">
+            <span class="afb-input-icon">📱</span>
+            <input class="afb-input" id="regPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number">
+          </div>
+        </div>
+
+        <div class="afb-group">
           <label class="afb-label">Roll Number / Student ID</label>
           <div class="afb-input-wrap">
             <span class="afb-input-icon">🪪</span>
@@ -916,6 +924,10 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
       </div>
     </div>
     <div class="dash-body">
+      <div id="examLockBanner" class="hidden" style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:12px;padding:16px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div style="font-size:0.9rem;line-height:1.6;color:#9a3412;"><strong>🔒 Exams locked hain.</strong><br>Admin se <strong>exam password</strong> lo, phir yahan enter karo — uske baad hi aap exam de paoge.</div>
+        <button class="btn btn-blue btn-sm" onclick="openUnlockModal()">🔑 Enter Exam Password</button>
+      </div>
       <div class="dash-grid">
         <div class="dash-card blue"><div class="dash-card-value" id="sdTotalExams">0</div><div class="dash-card-label">📋 Available Exams</div></div>
         <div class="dash-card green"><div class="dash-card-value" id="sdAttempted">0</div><div class="dash-card-label">✅ Exams Attempted</div></div>
@@ -1083,6 +1095,7 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
       </div>
       <div class="form-group"><label class="form-label">Roll Number</label><input class="form-input" id="editRoll" type="text" readonly style="background:#f0f2f5;"></div>
       <div class="form-group"><label class="form-label">Course</label><input class="form-input" id="editCourse" type="text" readonly style="background:#f0f2f5;"></div>
+      <div class="form-group"><label class="form-label">Mobile Number (forgot-password OTP ke liye)</label><input class="form-input" id="editPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number"></div>
       <div class="form-group"><label class="form-label">New Password (leave blank to keep current)</label><input class="form-input" id="editPass" type="password" placeholder="New password..."></div>
       <button class="btn btn-blue" onclick="saveProfile()">💾 Save Changes</button>
     </div>
@@ -1134,6 +1147,34 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
     <div class="modal-btns">
       <button class="btn btn-sm" onclick="closeModal('deleteExamModal')" style="background:white;border:1.5px solid var(--border);">Cancel</button>
       <button class="btn btn-danger btn-sm" onclick="confirmDeleteExam()">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student: admin ka diya hua exam password enter karo -->
+<div class="modal-overlay hidden" id="examUnlockModal">
+  <div class="modal-box">
+    <h3>🔑 Enter Exam Password</h3>
+    <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">Admin ne aapko jo exam password diya hai wo yahan daalo. Sahi password ke baad saare exams unlock ho jaayenge.</p>
+    <input class="form-input" id="examUnlockInput" type="text" autocomplete="off" maxlength="16" placeholder="e.g. K7PX2MQA" style="text-transform:uppercase;letter-spacing:3px;font-weight:700;text-align:center;" onkeydown="if(event.key==='Enter')submitExamUnlock()">
+    <div id="examUnlockAlert" class="hidden" style="margin-top:10px;"></div>
+    <div class="modal-btns" style="margin-top:16px;">
+      <button class="btn btn-sm" onclick="closeModal('examUnlockModal')" style="background:white;border:1.5px solid var(--border);">Cancel</button>
+      <button class="btn btn-blue btn-sm" onclick="submitExamUnlock()">🔓 Unlock Exams</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin: generate hua exam password (sirf ek baar dikhta hai) -->
+<div class="modal-overlay hidden" id="examPwShowModal">
+  <div class="modal-box">
+    <h3>🔑 Exam Password</h3>
+    <p id="examPwShowFor" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:12px;"></p>
+    <div id="examPwShowValue" style="font-size:1.8rem;font-weight:900;letter-spacing:6px;text-align:center;background:#f8fafc;border:2px dashed var(--border);border-radius:10px;padding:16px;user-select:all;"></div>
+    <p style="font-size:0.8rem;color:#b45309;margin-top:12px;line-height:1.6;">⚠️ Ye password sirf abhi dikh raha hai (database mein sirf hash save hota hai). Isse student ko de do. Student ke enter karte hi ye use ho jaayega.</p>
+    <div class="modal-btns" style="margin-top:14px;">
+      <button class="btn btn-sm" onclick="copyExamPw()" style="background:white;border:1.5px solid var(--border);">📋 Copy</button>
+      <button class="btn btn-blue btn-sm" onclick="closeModal('examPwShowModal')">Done</button>
     </div>
   </div>
 </div>
@@ -1450,7 +1491,7 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
         <div style="text-align:center;margin-bottom:28px;">
           <div style="font-size:2.8rem;margin-bottom:12px;">🔐</div>
           <h2 style="font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:8px;">Forgot Password?</h2>
-          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;">No worries! Enter your registered email address and we'll send you a 6-digit OTP to recover your account.</p>
+          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;">No worries! Enter your registered email address and we'll send you a 6-digit OTP (on your email and, if added, SMS on your registered mobile number) to recover your account.</p>
         </div>
         <div class="afb-group">
           <label class="afb-label">Registered Email Address</label>
@@ -1459,7 +1500,7 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
             <input class="afb-input" id="fpEmail" type="email" placeholder="Enter your registered email" onkeydown="if(event.key==='Enter')sendOTP()">
           </div>
         </div>
-        <button class="fp-btn" onclick="sendOTP()">📨 Send OTP to Email</button>
+        <button class="fp-btn" onclick="sendOTP()">📨 Send OTP</button>
         <button class="fp-btn-ghost" onclick="showPage('login')">← Back to Login</button>
       </div>
 
@@ -1468,7 +1509,7 @@ body.dark-mode .reg-form-box h2 { color:#e9d5ff; }
         <div style="text-align:center;margin-bottom:20px;">
           <div style="font-size:2.8rem;margin-bottom:12px;">📲</div>
           <h2 style="font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:8px;">Enter OTP</h2>
-          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;">We've sent a 6-digit verification code to:</p>
+          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;"><span id="fpSentVia">We've sent a 6-digit verification code to:</span></p>
         </div>
         <div class="fp-email-display" id="fpEmailDisplay">—</div>
         <p style="text-align:center;font-size:0.82rem;color:var(--text-muted);margin-bottom:4px;">Enter the 6-digit code below</p>
