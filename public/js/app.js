@@ -1207,11 +1207,7 @@ async function renderManageStudents() {
       <input class="search-input" id="studentSearch" placeholder="🔍 Search by name or roll number..." oninput="filterStudents()">
     </div>
     <div class="table-card" id="studentsTableWrap">
-<<<<<<< HEAD
-      <table><thead><tr><th>Student</th><th>Roll No</th><th>Course</th><th>Attempts</th><th>Avg Score</th><th>Registered</th><th>Exam Access</th></tr></thead>
-=======
-      <table><thead><tr><th>Student</th><th>Roll No</th><th>Course</th><th>Mobile</th><th>Attempts</th><th>Avg Score</th><th>Exam Access</th><th>Registered</th></tr></thead>
->>>>>>> 75966ee4314126e517bcf2a4a7585d8f18421d52
+<table><thead><tr><th>Student</th><th>Roll No</th><th>Course</th><th>Mobile</th><th>Attempts</th><th>Avg Score</th><th>Exam Access</th><th>Registered</th></tr></thead>
       <tbody id="studentsTableBody">${renderStudentRows(users, attempts)}</tbody></table>
     </div>`;
   allStudentsCache = []; allAttemptsCache = [];
